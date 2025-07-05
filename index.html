@@ -4,9 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ReclamosCiudadanos - Plataforma de Reclamos</title>
-    <meta name="description" content="Plataforma para hacer reclamos, quejas y protestas sobre servicios públicos y privados">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <title>ReclamosCiudadanos</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -14,130 +16,10 @@
         body { font-family: 'Inter', sans-serif; }
         .fade-in { animation: fadeIn 0.5s ease-in; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .form-container { display: none; }
-        .form-container.active { display: block; }
     </style>
 </head>
-<body class="bg-gray-50">
-    <!-- Header -->
-    <header class="bg-white shadow-sm border-b">
-        <div class="max-w-6xl mx-auto px-4 py-4">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                    <div class="bg-gradient-to-r from-blue-500 to-purple-600 w-10 h-10 rounded-lg flex items-center justify-center">
-                        <span class="text-white font-bold text-xl">R</span>
-                    </div>
-                    <div>
-                        <h1 class="text-xl font-bold text-gray-800">ReclamosCiudadanos</h1>
-                        <p class="text-xs text-gray-500">Tu voz importa</p>
-                    </div>
-                </div>
-                <nav class="hidden md:flex space-x-6">
-                    <a href="#" onclick="showSection('feed')" class="text-gray-600 hover:text-blue-600 font-medium">Reclamos</a>
-                    <a href="#" onclick="showSection('create')" class="text-gray-600 hover:text-blue-600 font-medium">Nuevo Reclamo</a>
-                    <a href="#" onclick="showSection('about')" class="text-gray-600 hover:text-blue-600 font-medium">Acerca de</a>
-                </nav>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="max-w-6xl mx-auto px-4 py-8">
-        <!-- Feed Section -->
-        <section id="feed-section" class="section active">
-            <div class="mb-8 text-center">
-                <h2 class="text-3xl font-bold text-gray-800 mb-4">Reclamos Recientes</h2>
-                <p class="text-gray-600 max-w-2xl mx-auto">Conoce lo que otros ciudadanos están reclamando y súmate a las causas que te importan</p>
-            </div>
-
-            <div class="grid gap-6 max-w-4xl mx-auto" id="complaints-container">
-                <!-- Los reclamos se cargarán aquí -->
-            </div>
-
-            <div class="text-center mt-8">
-                <button class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-full font-semibold transition-colors">
-                    Ver más reclamos
-                </button>
-            </div>
-        </section>
-
-        <!-- Create Section -->
-        <section id="create-section" class="section" style="display: none;">
-            <div class="max-w-3xl mx-auto">
-                <div class="mb-8 text-center">
-                    <h2 class="text-3xl font-bold text-gray-800 mb-4">Hacer un Reclamo</h2>
-                    <p class="text-gray-600">Describe tu situación y te ayudaremos a estructurar tu reclamo</p>
-                </div>
-
-                <!-- Área de texto libre -->
-                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-3">
-                        Cuéntanos qué está pasando
-                    </label>
-                    <textarea 
-                        id="free-text"
-                        placeholder="Escribe libremente sobre tu reclamo... Por ejemplo: 'En el hospital de mi barrio no hay médicos suficientes los fines de semana y la espera es muy larga'"
-                        class="w-full h-32 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                        oninput="processText()"
-                    ></textarea>
-                    <p class="text-xs text-gray-500 mt-2">
-                        Mientras escribes, iremos preparando un formulario específico para tu tipo de reclamo
-                    </p>
-                </div>
-
-                <!-- Formularios dinámicos -->
-                <div id="dynamic-forms"></div>
-
-                <!-- Botones de acción -->
-                <div class="flex space-x-4 mt-6">
-                    <button 
-                        id="submit-btn"
-                        class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors disabled:bg-gray-400"
-                        onclick="submitComplaint()"
-                        disabled
-                    >
-                        Publicar Reclamo
-                    </button>
-                    <button class="px-6 py-3 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors">
-                        Guardar Borrador
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- About Section -->
-        <section id="about-section" class="section" style="display: none;">
-            <div class="max-w-3xl mx-auto text-center">
-                <h2 class="text-3xl font-bold text-gray-800 mb-6">Acerca de ReclamosCiudadanos</h2>
-                <div class="bg-white rounded-lg shadow-md p-8">
-                    <p class="text-gray-600 text-lg mb-6">
-                        Somos una plataforma donde los ciudadanos pueden expresar sus reclamos, quejas y protestas sobre servicios públicos y privados.
-                    </p>
-                    <p class="text-gray-600 mb-6">
-                        Creemos que cada voz importa y que juntos podemos generar el cambio que necesitamos para mejorar nuestras comunidades.
-                    </p>
-                    <div class="grid md:grid-cols-3 gap-6 mt-8">
-                        <div class="text-center">
-                            <div class="text-4xl mb-3">📢</div>
-                            <h3 class="font-semibold text-gray-800 mb-2">Tu Voz</h3>
-                            <p class="text-sm text-gray-600">Expresa tus reclamos de forma clara y directa</p>
-                        </div>
-                        <div class="text-center">
-                            <div class="text-4xl mb-3">🤝</div>
-                            <h3 class="font-semibold text-gray-800 mb-2">Comunidad</h3>
-                            <p class="text-sm text-gray-600">Únete a otros ciudadanos con preocupaciones similares</p>
-                        </div>
-                        <div class="text-center">
-                            <div class="text-4xl mb-3">✊</div>
-                            <h3 class="font-semibold text-gray-800 mb-2">Acción</h3>
-                            <p class="text-sm text-gray-600">Genera presión para lograr cambios reales</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <script src="script.js"></script>
+<body>
+    <div id="root"></div>
+    <script type="text/babel" src="script.js"></script>
 </body>
 </html>
