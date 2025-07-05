@@ -4,22 +4,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ReclamosCiudadanos</title>
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <title>Plataforma Ciudadana de Reclamos</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .fade-in { animation: fadeIn 0.5s ease-in; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        body { 
+            font-family: 'Inter', sans-serif; 
+        }
+        .fade-in { 
+            animation: fadeIn 0.5s ease-in; 
+        }
+        @keyframes fadeIn { 
+            from { 
+                opacity: 0; 
+                transform: translateY(20px); 
+            } 
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            } 
+        }
+        .entity-highlight {
+            background: linear-gradient(120deg, #f59e0b 0%, #3b82f6 100%);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .hidden { 
+            display: none; 
+        }
     </style>
 </head>
 <body>
     <div id="root"></div>
-    <script type="text/babel" src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
