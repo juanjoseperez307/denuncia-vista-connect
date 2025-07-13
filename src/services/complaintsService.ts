@@ -115,8 +115,13 @@ class ComplaintsService {
   }
 
   // Search complaints
-  async searchComplaints(query: string, filters: ComplaintFilters = {}): Promise<Complaint[]> {
+  async searchComplaints(query: string, filters: ComplaintFilters = {}): Promise<any> {
     return apiService.post('/complaints/search', { query, ...filters });
+  }
+
+  // Get complaint by ID with extended data
+  async getComplaintById(id: number): Promise<any> {
+    return apiService.get(`/complaints/${id}/details`);
   }
 
   // Get complaint categories

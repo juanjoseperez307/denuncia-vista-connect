@@ -1,9 +1,19 @@
 
 import React, { useState } from 'react';
 import { Heart, MessageCircle, Share2, MapPin, Clock, TrendingUp } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { complaintsService } from '../services/complaintsService';
+import { useApi } from '../hooks/useApi';
+import { shouldUseMockData } from '../utils/mockData';
 
 const ComplaintFeed = () => {
-  const [complaints] = useState([
+  const navigate = useNavigate();
+  const [activeFilter, setActiveFilter] = useState('trending');
+  const [categoryFilter, setCategoryFilter] = useState('');
+
+  const { data: complaints, loading } = useApi<any>(
+    () => shouldUseMockData() 
+      ? Promise.resolve([
     {
       id: 1,
       author: 'María González',
@@ -58,7 +68,22 @@ const ComplaintFeed = () => {
       trending: true,
       verified: true
     }
-  ]);
+  ])
+      : complaintsService.getComplaints({ trending: activeFilter === 'trending', category: categoryFilter }),
+    [activeFilter, categoryFilter]
+  );
+
+  const handleLoadMore = () => {
+    navigate('/?tab=create');
+  };
+
+  const handleFilterClick = (filter: string) => {
+    setActiveFilter(filter);
+  };
+
+  const handleCategoryFilter = (category: string) => {
+    setCategoryFilter(category === categoryFilter ? '' : category);
+  };
 
   const getCategoryColor = (category: string) => {
     const colors: { [key: string]: string } = {
@@ -75,15 +100,36 @@ const ComplaintFeed = () => {
       {/* Feed Header */}
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-gray-800">Feed de Denuncias</h2>
+          <h2 className="text-xl font-bold text-gray-800">Feed de Reclamos</h2>
           <div className="flex space-x-2">
-            <button className="px-4 py-2 bg-orange-100 text-orange-800 rounded-full text-sm font-medium hover:bg-orange-200 transition-colors">
+            <button 
+              onClick={() => handleFilterClick('trending')}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                activeFilter === 'trending' 
+                  ? 'bg-orange-100 text-orange-800' 
+                  : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+              }`}
+            >
               🔥 Trending
             </button>
-            <button className="px-4 py-2 bg-gray-100 text-gray-800 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors">
+            <button 
+              onClick={() => handleFilterClick('recent')}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                activeFilter === 'recent' 
+                  ? 'bg-orange-100 text-orange-800' 
+                  : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+              }`}
+            >
               🕒 Recientes
             </button>
-            <button className="px-4 py-2 bg-gray-100 text-gray-800 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors">
+            <button 
+              onClick={() => handleFilterClick('nearby')}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                activeFilter === 'nearby' 
+                  ? 'bg-orange-100 text-orange-800' 
+                  : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+              }`}
+            >
               📍 Cerca tuyo
             </button>
           </div>
@@ -94,7 +140,12 @@ const ComplaintFeed = () => {
           {['Todas', 'Salud', 'Transporte', 'Educación', 'Seguridad', 'Ambiente'].map((filter) => (
             <button
               key={filter}
-              className="px-3 py-1 bg-white border border-gray-300 rounded-full text-sm hover:bg-gray-50 transition-colors"
+              onClick={() => handleCategoryFilter(filter === 'Todas' ? '' : filter)}
+              className={`px-3 py-1 rounded-full text-sm transition-colors ${
+                (filter === 'Todas' && !categoryFilter) || filter === categoryFilter
+                  ? 'bg-orange-100 text-orange-800 border border-orange-300'
+                  : 'bg-white border border-gray-300 hover:bg-gray-50'
+              }`}
             >
               {filter}
             </button>
@@ -103,7 +154,25 @@ const ComplaintFeed = () => {
       </div>
 
       {/* Complaints List */}
-      {complaints.map((complaint) => (
+      {loading ? (
+        <div className="space-y-6">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="bg-white rounded-lg shadow-md p-6">
+              <div className="animate-pulse">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+                  <div className="flex-1">
+                    <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                  </div>
+                </div>
+                <div className="h-20 bg-gray-200 rounded"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        (complaints || []).map((complaint) => (
         <div key={complaint.id} className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
           {/* Complaint Header */}
           <div className="p-6 pb-4">
@@ -172,18 +241,25 @@ const ComplaintFeed = () => {
                   <span className="text-sm font-medium">{complaint.shares}</span>
                 </button>
               </div>
-              <button className="text-sm text-orange-600 hover:text-orange-800 font-medium transition-colors">
+              <Link 
+                to={`/complaint/${complaint.id}`}
+                className="text-sm text-orange-600 hover:text-orange-800 font-medium transition-colors"
+              >
                 Ver detalles →
-              </button>
+              </Link>
             </div>
           </div>
         </div>
-      ))}
+      ))
+      )}
 
       {/* Load More */}
       <div className="text-center py-8">
-        <button className="px-8 py-3 bg-gradient-to-r from-orange-500 to-blue-600 hover:from-orange-600 hover:to-blue-700 text-white font-semibold rounded-full transition-all transform hover:scale-105">
-          Cargar más denuncias
+        <button 
+          onClick={handleLoadMore}
+          className="px-8 py-3 bg-gradient-to-r from-orange-500 to-blue-600 hover:from-orange-600 hover:to-blue-700 text-white font-semibold rounded-full transition-all transform hover:scale-105"
+        >
+          Cargar más reclamos
         </button>
       </div>
     </div>

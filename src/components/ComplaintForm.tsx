@@ -21,9 +21,9 @@ const ComplaintForm = () => {
   return (
     <div className="bg-white rounded-lg shadow-md p-8">
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Nueva Denuncia Ciudadana</h2>
+        <h2 className="text-2xl font-bold text-gray-800 mb-2">Nuevo Reclamo Ciudadano</h2>
         <p className="text-gray-600">
-          Describe tu denuncia de forma clara. Nuestro sistema detectará automáticamente entidades relevantes.
+          Describe tu reclamo de forma clara. Nuestro sistema detectará automáticamente entidades relevantes.
         </p>
       </div>
 
@@ -31,7 +31,7 @@ const ComplaintForm = () => {
         {/* Complaint Text */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Describe tu denuncia
+            Describe tu reclamo
           </label>
           <EntityHighlighter
             text={complaintText}
@@ -103,7 +103,7 @@ const ComplaintForm = () => {
               <Users className="w-5 h-5 text-gray-600" />
               <div>
                 <p className="font-medium text-gray-800">Configuración de privacidad</p>
-                <p className="text-sm text-gray-600">¿Deseas realizar esta denuncia de forma anónima?</p>
+                <p className="text-sm text-gray-600">¿Deseas realizar este reclamo de forma anónima?</p>
               </div>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
@@ -124,7 +124,7 @@ const ComplaintForm = () => {
             type="submit"
             className="flex-1 bg-gradient-to-r from-orange-500 to-blue-600 hover:from-orange-600 hover:to-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-all transform hover:scale-105 shadow-lg"
           >
-            Publicar Denuncia
+            Publicar Reclamo
           </button>
           <button
             type="button"

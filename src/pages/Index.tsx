@@ -57,14 +57,20 @@ const Index = () => {
               Plataforma Ciudadana de Transparencia
             </h1>
             <p className="text-xl mb-8 opacity-90">
-              Conecta datos públicos y personales para revelar patrones, promover transparencia 
+              Conecta datos públicos y personales para promover transparencia 
               y fomentar la participación ciudadana activa
             </p>
             <div className="flex justify-center gap-4">
-              <button className="bg-white text-orange-600 px-8 py-3 rounded-full font-semibold hover:bg-orange-50 transition-all transform hover:scale-105">
-                Crear Denuncia
+              <button 
+                onClick={() => setActiveTab('create')}
+                className="bg-white text-orange-600 px-8 py-3 rounded-full font-semibold hover:bg-orange-50 transition-all transform hover:scale-105"
+              >
+                Crear Reclamo
               </button>
-              <button className="bg-transparent border-2 border-white text-white px-8 py-3 rounded-full font-semibold hover:bg-white hover:text-orange-600 transition-all">
+              <button 
+                onClick={() => setActiveTab('analytics')}
+                className="bg-transparent border-2 border-white text-white px-8 py-3 rounded-full font-semibold hover:bg-white hover:text-orange-600 transition-all"
+              >
                 Explorar Datos
               </button>
             </div>
@@ -77,8 +83,8 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <nav className="flex space-x-8">
             {[
-              { id: 'feed', label: 'Feed de Denuncias', icon: '📢' },
-              { id: 'create', label: 'Nueva Denuncia', icon: '✍️' },
+              { id: 'feed', label: 'Feed de Reclamos', icon: '📢' },
+              { id: 'create', label: 'Nuevo Reclamo', icon: '✍️' },
               { id: 'analytics', label: 'Análisis', icon: '📊' },
               { id: 'ranking', label: 'Ranking', icon: '🏆' }
             ].map((tab) => (
@@ -132,7 +138,7 @@ const Index = () => {
                 ) : (
                   <div className="space-y-3">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Denuncias Hoy</span>
+                      <span className="text-gray-600">Reclamos Hoy</span>
                       <span className="font-bold text-orange-600">
                         {dashboardStats?.todayComplaints || 0}
                       </span>
