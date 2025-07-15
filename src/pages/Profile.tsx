@@ -1,33 +1,19 @@
 import React, { useState } from 'react';
-import { User, Edit3, Settings, Bell, Shield, Award } from 'lucide-react';
+import { Edit3, Settings, Bell, Shield, Award } from 'lucide-react';
+import MainLayout from '../components/MainLayout';
+import { localStorageService } from '../services/localStorageService';
 
 const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
-  const [profile, setProfile] = useState({
-    name: 'Juan Pérez',
-    email: 'juan.perez@email.com',
-    phone: '+54 11 1234-5678',
-    location: 'Buenos Aires, Argentina',
-    bio: 'Ciudadano comprometido con la transparencia y la participación cívica',
-    avatar: '👨‍💼'
-  });
-
-  const [stats] = useState({
-    complaintsSubmitted: 12,
-    transparencyPoints: 1247,
-    level: 5,
-    commentsGiven: 45,
-    helpfulVotes: 89
-  });
+  const [profile, setProfile] = useState(() => localStorageService.getUserProfile());
 
   const handleSave = () => {
     setIsEditing(false);
-    // Aquí iría la llamada al API para guardar los cambios
+    localStorageService.updateUserProfile(profile);
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
+    <MainLayout>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Profile Info */}
           <div className="lg:col-span-2">
@@ -127,15 +113,15 @@ const Profile = () => {
                 <h3 className="text-lg font-semibold text-gray-800">Tu Progreso</h3>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-orange-600 mb-2">
-                  Nivel {stats.level}
+                <div className="text-3xl font-bold text-primary mb-2">
+                  Nivel {profile.level}
                 </div>
-                <div className="text-sm text-gray-600 mb-4">
-                  {stats.transparencyPoints.toLocaleString()} Puntos de Transparencia
+                <div className="text-sm text-muted-foreground mb-4">
+                  {profile.transparencyPoints.toLocaleString()} Puntos de Transparencia
                 </div>
-                <div className="bg-gray-200 rounded-full h-2 mb-2">
+                <div className="bg-muted rounded-full h-2 mb-2">
                   <div 
-                    className="bg-gradient-to-r from-orange-400 to-blue-500 h-2 rounded-full" 
+                    className="bg-gradient-to-r from-purple-500 via-violet-500 to-indigo-500 h-2 rounded-full" 
                     style={{ width: '65%' }}
                   ></div>
                 </div>
@@ -150,16 +136,16 @@ const Profile = () => {
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Estadísticas</h3>
               <div className="space-y-4">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Reclamos Enviados</span>
-                  <span className="font-bold text-gray-800">{stats.complaintsSubmitted}</span>
+                  <span className="text-muted-foreground">Reclamos Enviados</span>
+                  <span className="font-bold text-foreground">{profile.complaintsSubmitted}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Comentarios</span>
-                  <span className="font-bold text-gray-800">{stats.commentsGiven}</span>
+                  <span className="text-muted-foreground">Comentarios</span>
+                  <span className="font-bold text-foreground">{profile.commentsGiven}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Votos Útiles</span>
-                  <span className="font-bold text-gray-800">{stats.helpfulVotes}</span>
+                  <span className="text-muted-foreground">Votos Útiles</span>
+                  <span className="font-bold text-foreground">{profile.helpfulVotes}</span>
                 </div>
               </div>
             </div>
@@ -184,8 +170,7 @@ const Profile = () => {
             </div>
           </div>
         </div>
-      </div>
-    </div>
+    </MainLayout>
   );
 };
 

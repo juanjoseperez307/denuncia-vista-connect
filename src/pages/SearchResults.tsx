@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { Search, Filter, Clock, MapPin, TrendingUp } from 'lucide-react';
-import { complaintsService } from '../services/complaintsService';
+import { Search, Filter, Clock, MapPin } from 'lucide-react';
+import { localStorageService } from '../services/localStorageService';
 import { useApi } from '../hooks/useApi';
-import { shouldUseMockData } from '../utils/mockData';
+import MainLayout from '../components/MainLayout';
 
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
@@ -20,40 +20,7 @@ const SearchResults = () => {
     loading, 
     error 
   } = useApi<any>(
-    () => shouldUseMockData() 
-      ? Promise.resolve({
-          complaints: [
-            {
-              id: 1,
-              title: 'Problemas en Hospital Italiano',
-              content: 'En el Hospital Italiano de Palermo la espera en guardia supera las 4 horas...',
-              author: 'María González',
-              time: '2 horas',
-              category: 'Salud',
-              location: 'Palermo, CABA',
-              likes: 47,
-              comments: 12
-            },
-            {
-              id: 2,
-              title: 'Demoras en transporte público',
-              content: 'Los colectivos de la línea 152 no respetan los horarios...',
-              author: 'Carlos Rodríguez',
-              time: '4 horas',
-              category: 'Transporte',
-              location: 'Plaza Italia, CABA',
-              likes: 23,
-              comments: 7
-            }
-          ],
-          totalResults: 2,
-          suggestions: ['Hospital', 'Transporte público', 'Palermo'],
-          filters: {
-            categories: ['Salud', 'Transporte', 'Educación'],
-            locations: ['CABA', 'Buenos Aires', 'Córdoba']
-          }
-        })
-      : complaintsService.searchComplaints(query, filters),
+    () => Promise.resolve(localStorageService.searchComplaints(query, filters)),
     [query, filters]
   );
 
@@ -62,8 +29,7 @@ const SearchResults = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
+    <MainLayout>
         {/* Search Header */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <div className="flex items-center space-x-4 mb-4">
@@ -264,8 +230,7 @@ const SearchResults = () => {
             )}
           </div>
         </div>
-      </div>
-    </div>
+    </MainLayout>
   );
 };
 

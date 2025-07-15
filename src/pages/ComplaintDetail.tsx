@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Heart, MessageCircle, Share2, MapPin, Clock, Flag, TrendingUp } from 'lucide-react';
-import { complaintsService } from '../services/complaintsService';
+import { ArrowLeft, Heart, MessageCircle, Share2, MapPin, Clock, Flag } from 'lucide-react';
+import { localStorageService } from '../services/localStorageService';
 import { useApi } from '../hooks/useApi';
-import { shouldUseMockData } from '../utils/mockData';
+import MainLayout from '../components/MainLayout';
 
 const ComplaintDetail = () => {
   const { id } = useParams();
@@ -40,28 +40,28 @@ const ComplaintDetail = () => {
     loading, 
     error 
   } = useApi<any>(
-    () => shouldUseMockData() 
-      ? Promise.resolve(mockComplaint)
-      : complaintsService.getComplaint(id || ''),
+    () => {
+      const stored = localStorageService.getComplaint(id || '');
+      return Promise.resolve(stored || mockComplaint);
+    },
     [id]
   );
 
-  if (loading) return <div className="container mx-auto px-4 py-8">Cargando...</div>;
-  if (error) return <div className="container mx-auto px-4 py-8">Error al cargar el reclamo</div>;
-  if (!complaint) return <div className="container mx-auto px-4 py-8">Reclamo no encontrado</div>;
+  if (loading) return <MainLayout><div className="text-center py-8">Cargando...</div></MainLayout>;
+  if (error) return <MainLayout><div className="text-center py-8 text-destructive">Error al cargar el reclamo</div></MainLayout>;
+  if (!complaint) return <MainLayout><div className="text-center py-8">Reclamo no encontrado</div></MainLayout>;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 mb-6"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          <span>Volver</span>
-        </button>
+    <MainLayout>
+      <button
+        onClick={() => navigate(-1)}
+        className="flex items-center space-x-2 text-muted-foreground hover:text-foreground mb-6 transition-colors"
+      >
+        <ArrowLeft className="w-5 h-5" />
+        <span>Volver</span>
+      </button>
 
-        <div className="bg-white rounded-lg shadow-md">
+      <div className="bg-card rounded-lg shadow-md border">
           {/* Header */}
           <div className="p-6 border-b">
             <div className="flex items-start justify-between mb-4">
@@ -162,8 +162,7 @@ const ComplaintDetail = () => {
             </div>
           </div>
         </div>
-      </div>
-    </div>
+    </MainLayout>
   );
 };
 
