@@ -90,11 +90,3 @@ export const mockApiDelay = (ms: number = 500): Promise<void> => {
 export const shouldUseMockData = (): boolean => {
   return process.env.NODE_ENV === 'development' && !process.env.REACT_APP_USE_REAL_API;
 };
-
-// Initialize localStorage with mock data on first load
-export const initializeMockData = () => {
-  const { localStorageService } = require('../services/localStorageService');
-  localStorageService.initializeWithDefaults({
-    complaints: mockComplaints
-  });
-};
