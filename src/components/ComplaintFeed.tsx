@@ -4,6 +4,7 @@ import { Heart, MessageCircle, Share2, MapPin, Clock, TrendingUp } from 'lucide-
 import { Link, useNavigate } from 'react-router-dom';
 import { serviceFactory } from '../services/ServiceFactory';
 import { useApi } from '../hooks/useApi';
+import { ComplaintStatus } from '../services/interfaces/IComplaintsService';
 
 const ComplaintFeed = () => {
   const navigate = useNavigate();
@@ -54,6 +55,26 @@ const ComplaintFeed = () => {
       'Seguridad': 'bg-yellow-100 text-yellow-800'
     };
     return colors[category] || 'bg-gray-100 text-gray-800';
+  };
+
+  const getStatusColor = (status: ComplaintStatus) => {
+    const colors = {
+      'pending': 'bg-yellow-100 text-yellow-800',
+      'in-progress': 'bg-blue-100 text-blue-800',
+      'resolved': 'bg-green-100 text-green-800',
+      'rejected': 'bg-red-100 text-red-800'
+    };
+    return colors[status] || 'bg-gray-100 text-gray-800';
+  };
+
+  const getStatusLabel = (status: ComplaintStatus) => {
+    const labels = {
+      'pending': 'Pendiente',
+      'in-progress': 'En Proceso',
+      'resolved': 'Resuelto',
+      'rejected': 'Rechazado'
+    };
+    return labels[status] || status;
   };
 
   return (
@@ -170,9 +191,14 @@ const ComplaintFeed = () => {
                   </div>
                 </div>
               </div>
-              <span className={`px-3 py-1 rounded-full text-xs font-medium ${getCategoryColor(complaint.category)}`}>
-                {complaint.category}
-              </span>
+              <div className="flex flex-col space-y-2">
+                <span className={`px-3 py-1 rounded-full text-xs font-medium ${getCategoryColor(complaint.category)}`}>
+                  {complaint.category}
+                </span>
+                <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(complaint.status || 'pending')}`}>
+                  {getStatusLabel(complaint.status || 'pending')}
+                </span>
+              </div>
             </div>
 
             {/* Complaint Content */}

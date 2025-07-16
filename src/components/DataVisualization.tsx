@@ -55,7 +55,14 @@ const DataVisualization = () => {
       }
     };
 
+    // Initial load
     loadAnalyticsData();
+    
+    // Set up interval to update data every 1 second
+    const interval = setInterval(loadAnalyticsData, 1000);
+    
+    // Cleanup interval on component unmount
+    return () => clearInterval(interval);
   }, []);
 
   return (
