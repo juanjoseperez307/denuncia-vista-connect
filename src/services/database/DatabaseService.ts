@@ -68,6 +68,9 @@ export class DatabaseService {
         verified BOOLEAN DEFAULT FALSE,
         is_anonymous BOOLEAN DEFAULT FALSE,
         files TEXT, -- JSON string
+        status TEXT DEFAULT 'pending',
+        status_updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        status_updated_by TEXT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       );

@@ -1,23 +1,36 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Trophy, Star, Award, Target, TrendingUp, Users } from 'lucide-react';
+import { serviceFactory } from '../services/ServiceFactory';
 
 const GamificationPanel = () => {
-  const topUsers = [
-    { rank: 1, name: 'María González', points: 2847, badge: '🏆', level: 'Activista Elite', contributions: 45 },
-    { rank: 2, name: 'Carlos Rodríguez', points: 2156, badge: '🥈', level: 'Ciudadano Comprometido', contributions: 38 },
-    { rank: 3, name: 'Ana Martínez', points: 1923, badge: '🥉', level: 'Defensor Público', contributions: 32 },
-    { rank: 4, name: 'Luis Fernández', points: 1654, badge: '⭐', level: 'Vigilante Social', contributions: 28 },
-    { rank: 5, name: 'Sofia Pérez', points: 1432, badge: '💎', level: 'Ciudadano Activo', contributions: 24 }
-  ];
+  const [topUsers, setTopUsers] = useState<any[]>([]);
+  const [achievements, setAchievements] = useState<any[]>([]);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [activeRanking, setActiveRanking] = useState('weekly');
 
-  const achievements = [
-    { icon: '🎯', name: 'Primera Denuncia', description: 'Realizaste tu primera denuncia ciudadana', rarity: 'common', unlocked: true },
-    { icon: '🔥', name: 'Racha de Fuego', description: '5 denuncias en una semana', rarity: 'uncommon', unlocked: true },
-    { icon: '👥', name: 'Voz del Pueblo', description: '100+ likes en una denuncia', rarity: 'rare', unlocked: false },
-    { icon: '🎖️', name: 'Investigador', description: 'Conectaste 10+ entidades diferentes', rarity: 'epic', unlocked: true },
-    { icon: '👑', name: 'Líder Comunitario', description: 'Top 10 del ranking mensual', rarity: 'legendary', unlocked: false }
-  ];
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [leaderboard, userProfile, userAchievements] = await Promise.all([
+          serviceFactory.getGamificationService().getLeaderboard(10),
+          serviceFactory.getGamificationService().getUserProfile(),
+          serviceFactory.getGamificationService().getAchievements()
+        ]);
+
+        setTopUsers(leaderboard);
+        setCurrentUser(userProfile);
+        setAchievements(userAchievements);
+      } catch (error) {
+        console.error('Error loading gamification data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [activeRanking]);
 
   const getRarityColor = (rarity: string) => {
     const colors: { [key: string]: string } = {
@@ -30,15 +43,25 @@ const GamificationPanel = () => {
     return colors[rarity] || 'bg-gray-100 text-gray-800';
   };
 
-  const currentUser = {
-    rank: 15,
-    name: 'Juan Pérez',
-    points: 1247,
-    level: 'Ciudadano Activo',
-    nextLevel: 'Vigilante Social',
-    pointsToNext: 253,
-    contributions: 18
+  const getRankBadge = (rank: number) => {
+    if (rank === 1) return '🏆';
+    if (rank === 2) return '🥈';
+    if (rank === 3) return '🥉';
+    if (rank <= 10) return '⭐';
+    return '💎';
   };
+
+  if (loading) {
+    return (
+      <div className="space-y-8">
+        <div className="bg-gray-100 rounded-lg p-8 animate-pulse">
+          <div className="h-8 bg-gray-200 rounded mb-4"></div>
+          <div className="h-4 bg-gray-200 rounded mb-2"></div>
+          <div className="h-4 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -47,10 +70,10 @@ const GamificationPanel = () => {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-2xl font-bold">Tu Progreso</h2>
-            <p className="opacity-90">Nivel: {currentUser.level}</p>
+            <p className="opacity-90">Nivel: {currentUser?.level}</p>
           </div>
           <div className="text-right">
-            <div className="text-3xl font-bold">{currentUser.points}</div>
+            <div className="text-3xl font-bold">{currentUser?.transparencyPoints?.toLocaleString()}</div>
             <div className="text-sm opacity-90">Puntos de Transparencia</div>
           </div>
         </div>
@@ -124,15 +147,19 @@ const GamificationPanel = () => {
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-xl font-bold text-gray-800">Ranking de Transparencia</h3>
           <div className="flex space-x-2">
-            <button className="px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm font-medium">
-              Semanal
-            </button>
-            <button className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">
-              Mensual
-            </button>
-            <button className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">
-              Anual
-            </button>
+            {['weekly', 'monthly', 'yearly'].map((period) => (
+              <button
+                key={period}
+                onClick={() => setActiveRanking(period)}
+                className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  activeRanking === period
+                    ? 'bg-orange-100 text-orange-800'
+                    : 'bg-gray-100 text-gray-600'
+                }`}
+              >
+                {period === 'weekly' ? 'Semanal' : period === 'monthly' ? 'Mensual' : 'Anual'}
+              </button>
+            ))}
           </div>
         </div>
 
@@ -150,17 +177,17 @@ const GamificationPanel = () => {
                 <div className={`text-2xl font-bold ${
                   user.rank <= 3 ? 'text-orange-600' : 'text-gray-600'
                 }`}>
-                  {user.badge}
+                  {getRankBadge(user.rank)}
                 </div>
                 <div>
-                  <div className="font-semibold text-gray-800">{user.name}</div>
-                  <div className="text-sm text-gray-600">{user.level}</div>
+                  <div className="font-semibold text-gray-800">{user.username}</div>
+                  <div className="text-sm text-gray-600">Nivel {user.level}</div>
                 </div>
               </div>
               
               <div className="text-right">
                 <div className="font-bold text-lg text-gray-800">{user.points.toLocaleString()}</div>
-                <div className="text-sm text-gray-600">{user.contributions} denuncias</div>
+                <div className="text-sm text-gray-600">{user.change >= 0 ? '+' : ''}{user.change} esta semana</div>
               </div>
             </div>
           ))}
@@ -177,7 +204,7 @@ const GamificationPanel = () => {
               </div>
             </div>
             <div className="text-right">
-              <div className="font-bold text-lg text-gray-800">{currentUser.points.toLocaleString()}</div>
+              <div className="font-bold text-lg text-gray-800">{currentUser.points}</div>
               <div className="text-sm text-gray-600">{currentUser.contributions} denuncias</div>
             </div>
           </div>

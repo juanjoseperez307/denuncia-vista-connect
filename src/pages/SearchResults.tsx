@@ -20,7 +20,19 @@ const SearchResults = () => {
     loading, 
     error 
   } = useApi<any>(
-    () => serviceFactory.getComplaintsService().getComplaints({ query, ...filters }),
+    async () => {
+      if (query.trim()) {
+        return await serviceFactory.getComplaintsService().searchComplaints(query, filters);
+      } else {
+        const complaints = await serviceFactory.getComplaintsService().getComplaints(filters);
+        return {
+          complaints,
+          totalResults: complaints.length,
+          suggestions: [],
+          filters: { categories: [], locations: [] }
+        };
+      }
+    },
     [query, filters]
   );
 

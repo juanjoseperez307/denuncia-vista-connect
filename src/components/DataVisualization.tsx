@@ -1,34 +1,57 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LineChart, Line, PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { serviceFactory } from '../services/ServiceFactory';
 
 const DataVisualization = () => {
-  const categoryData = [
-    { name: 'Salud', value: 245, color: '#EF4444' },
-    { name: 'Transporte', value: 189, color: '#3B82F6' },
-    { name: 'Seguridad', value: 156, color: '#F59E0B' },
-    { name: 'Educación', value: 123, color: '#10B981' },
-    { name: 'Ambiente', value: 89, color: '#06B6D4' },
-    { name: 'Corrupción', value: 67, color: '#8B5CF6' }
-  ];
+  const [stats, setStats] = useState<any>(null);
+  const [categoryData, setCategoryData] = useState<any[]>([]);
+  const [timelineData, setTimelineData] = useState<any[]>([]);
+  const [locationData, setLocationData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const timelineData = [
-    { month: 'Ene', denuncias: 120, resueltas: 45 },
-    { month: 'Feb', denuncias: 145, resueltas: 67 },
-    { month: 'Mar', denuncias: 180, resueltas: 89 },
-    { month: 'Abr', denuncias: 165, resueltas: 98 },
-    { month: 'May', denuncias: 220, resueltas: 123 },
-    { month: 'Jun', denuncias: 195, resueltas: 134 }
-  ];
+  useEffect(() => {
+    const loadAnalyticsData = async () => {
+      try {
+        const [complaintStats, dashboardStats, categoryStats, locationStats, timelineStats] = await Promise.all([
+          serviceFactory.getComplaintsService().getComplaintStats(),
+          serviceFactory.getAnalyticsService().getDashboardStats(),
+          serviceFactory.getAnalyticsService().getCategoryStats(),
+          serviceFactory.getAnalyticsService().getLocationStats(),
+          serviceFactory.getAnalyticsService().getTimelineData()
+        ]);
 
-  const locationData = [
-    { zona: 'Palermo', denuncias: 89 },
-    { zona: 'Recoleta', denuncias: 67 },
-    { zona: 'Belgrano', denuncias: 56 },
-    { zona: 'San Telmo', denuncias: 45 },
-    { zona: 'Barracas', denuncias: 34 },
-    { zona: 'Villa Crespo', denuncias: 23 }
-  ];
+        setStats(complaintStats);
+        
+        // Transform category stats to chart format
+        setCategoryData(categoryStats.map(cat => ({
+          name: cat.name,
+          value: cat.count,
+          color: cat.color
+        })));
+
+        // Transform location stats to chart format
+        setLocationData(locationStats.map(loc => ({
+          zona: loc.name,
+          denuncias: loc.count
+        })));
+
+        // Transform timeline data to chart format
+        setTimelineData(timelineStats.map(item => ({
+          month: item.period,
+          denuncias: item.total,
+          resueltas: item.resolved
+        })));
+
+      } catch (error) {
+        console.error('Error loading analytics data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadAnalyticsData();
+  }, []);
 
   return (
     <div className="space-y-8">
@@ -36,28 +59,40 @@ const DataVisualization = () => {
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Visualización de Datos</h2>
         
         {/* Key Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-gradient-to-br from-red-100 to-red-200 rounded-lg p-6 text-center">
-            <div className="text-3xl font-bold text-red-600 mb-2">1,247</div>
-            <div className="text-sm text-red-800">Total Denuncias</div>
-            <div className="text-xs text-red-600 mt-1">+12% vs mes anterior</div>
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="bg-gray-100 rounded-lg p-6 text-center animate-pulse">
+                <div className="h-8 bg-gray-200 rounded mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded mb-1"></div>
+                <div className="h-3 bg-gray-200 rounded"></div>
+              </div>
+            ))}
           </div>
-          <div className="bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg p-6 text-center">
-            <div className="text-3xl font-bold text-blue-600 mb-2">687</div>
-            <div className="text-sm text-blue-800">En Proceso</div>
-            <div className="text-xs text-blue-600 mt-1">55% del total</div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div className="bg-gradient-to-br from-red-100 to-red-200 rounded-lg p-6 text-center">
+              <div className="text-3xl font-bold text-red-600 mb-2">{stats?.total?.toLocaleString()}</div>
+              <div className="text-sm text-red-800">Total Denuncias</div>
+              <div className="text-xs text-red-600 mt-1">Todas las categorías</div>
+            </div>
+            <div className="bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg p-6 text-center">
+              <div className="text-3xl font-bold text-blue-600 mb-2">{stats?.inProgress?.toLocaleString()}</div>
+              <div className="text-sm text-blue-800">En Proceso</div>
+              <div className="text-xs text-blue-600 mt-1">{stats?.total > 0 ? Math.round((stats?.inProgress / stats?.total) * 100) : 0}% del total</div>
+            </div>
+            <div className="bg-gradient-to-br from-green-100 to-green-200 rounded-lg p-6 text-center">
+              <div className="text-3xl font-bold text-green-600 mb-2">{stats?.resolved?.toLocaleString()}</div>
+              <div className="text-sm text-green-800">Resueltas</div>
+              <div className="text-xs text-green-600 mt-1">{stats?.total > 0 ? Math.round((stats?.resolved / stats?.total) * 100) : 0}% del total</div>
+            </div>
+            <div className="bg-gradient-to-br from-orange-100 to-orange-200 rounded-lg p-6 text-center">
+              <div className="text-3xl font-bold text-orange-600 mb-2">{stats?.resolutionRate}%</div>
+              <div className="text-sm text-orange-800">Tasa Resolución</div>
+              <div className="text-xs text-orange-600 mt-1">Promedio general</div>
+            </div>
           </div>
-          <div className="bg-gradient-to-br from-green-100 to-green-200 rounded-lg p-6 text-center">
-            <div className="text-3xl font-bold text-green-600 mb-2">456</div>
-            <div className="text-sm text-green-800">Resueltas</div>
-            <div className="text-xs text-green-600 mt-1">37% del total</div>
-          </div>
-          <div className="bg-gradient-to-br from-orange-100 to-orange-200 rounded-lg p-6 text-center">
-            <div className="text-3xl font-bold text-orange-600 mb-2">72%</div>
-            <div className="text-sm text-orange-800">Tasa Resolución</div>
-            <div className="text-xs text-orange-600 mt-1">+5% vs trimestre</div>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Charts Grid */}
