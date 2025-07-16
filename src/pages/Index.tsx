@@ -18,7 +18,7 @@ const Index = () => {
     loading: statsLoading, 
     error: statsError 
   } = useApi(
-    () => Promise.resolve(localStorageService.getStats()),
+    () => Promise.resolve(serviceFactory.getAnalyticsService().getDashboardStats()),
     []
   );
 
@@ -26,7 +26,7 @@ const Index = () => {
     data: trendingTopics, 
     loading: trendsLoading 
   } = useApi(
-    () => Promise.resolve(localStorageService.getTrendingTopics()),
+    () => Promise.resolve(serviceFactory.getAnalyticsService().getTrendingTopics()),
     []
   );
 
@@ -35,7 +35,7 @@ const Index = () => {
     loading: userLoading 
   } = useApi(
     () => Promise.resolve({
-      ...localStorageService.getUserProfile(),
+      ...serviceFactory.getGamificationService().getUserProfile(),
       nextLevelPoints: 500
     }),
     []

@@ -1,13 +1,19 @@
 
 import React, { useState } from 'react';
 import { MapPin, Upload, Tag, Users } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import EntityHighlighter from './EntityHighlighter';
+import { serviceFactory } from '../services/ServiceFactory';
+import { ComplaintFormData } from '../services/interfaces/IComplaintsService';
 
 const ComplaintForm = () => {
+  const navigate = useNavigate();
   const [complaintText, setComplaintText] = useState('');
   const [category, setCategory] = useState('');
   const [location, setLocation] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [files, setFiles] = useState<File[]>([]);
 
   const categories = [
     { id: 'salud', label: 'Salud', icon: '🏥', color: 'bg-red-100 text-red-800' },
@@ -18,6 +24,51 @@ const ComplaintForm = () => {
     { id: 'corrupcion', label: 'Corrupción', icon: '⚖️', color: 'bg-purple-100 text-purple-800' }
   ];
 
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      setFiles(Array.from(event.target.files));
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!complaintText.trim() || !category || !location.trim()) {
+      alert('Por favor completa todos los campos obligatorios');
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      const complaintData: ComplaintFormData = {
+        content: complaintText,
+        category,
+        location,
+        isAnonymous,
+        files
+      };
+
+      const newComplaint = await serviceFactory.getComplaintsService().createComplaint(complaintData);
+      
+      // Redirigir al detalle del reclamo creado
+      navigate(`/complaint/${newComplaint.id}`);
+      
+      // Limpiar el formulario
+      setComplaintText('');
+      setCategory('');
+      setLocation('');
+      setIsAnonymous(false);
+      setFiles([]);
+      
+    } catch (error) {
+      console.error('Error al publicar el reclamo:', error);
+      alert('Ocurrió un error al publicar el reclamo. Por favor intenta nuevamente.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md p-8">
       <div className="mb-8">
@@ -27,7 +78,7 @@ const ComplaintForm = () => {
         </p>
       </div>
 
-      <form className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6">
         {/* Complaint Text */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -89,11 +140,35 @@ const ComplaintForm = () => {
           <label className="block text-sm font-medium text-gray-700 mb-3">
             Adjuntar evidencia (opcional)
           </label>
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-orange-400 transition-colors cursor-pointer">
+          <label 
+            htmlFor="file-upload" 
+            className="block border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-orange-400 transition-colors cursor-pointer"
+          >
             <Upload className="mx-auto w-12 h-12 text-gray-400 mb-3" />
             <p className="text-gray-600 mb-2">Arrastra archivos aquí o haz clic para seleccionar</p>
             <p className="text-xs text-gray-500">PDF, imágenes, videos (máx. 10MB)</p>
-          </div>
+            <input
+              type="file"
+              multiple
+              accept=".pdf,.jpg,.jpeg,.png,.gif,.mp4,.mov"
+              onChange={handleFileUpload}
+              className="hidden"
+              id="file-upload"
+            />
+          </label>
+          {files.length > 0 && (
+            <div className="mt-3">
+              <p className="text-sm text-gray-600 mb-2">Archivos seleccionados:</p>
+              <div className="space-y-1">
+                {files.map((file, index) => (
+                  <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                    <span className="text-sm text-gray-700">{file.name}</span>
+                    <span className="text-xs text-gray-500">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Privacy Settings */}
@@ -122,13 +197,19 @@ const ComplaintForm = () => {
         <div className="flex space-x-4">
           <button
             type="submit"
-            className="flex-1 bg-gradient-to-r from-orange-500 to-blue-600 hover:from-orange-600 hover:to-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-all transform hover:scale-105 shadow-lg"
+            disabled={isSubmitting || !complaintText.trim() || !category || !location.trim()}
+            className={`flex-1 font-semibold py-3 px-6 rounded-lg transition-all transform shadow-lg ${
+              isSubmitting || !complaintText.trim() || !category || !location.trim()
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-gradient-to-r from-orange-500 to-blue-600 hover:from-orange-600 hover:to-blue-700 hover:scale-105'
+            } text-white`}
           >
-            Publicar Reclamo
+            {isSubmitting ? 'Publicando...' : 'Publicar Reclamo'}
           </button>
           <button
             type="button"
-            className="px-6 py-3 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
+            disabled={isSubmitting}
+            className="px-6 py-3 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
           >
             Guardar Borrador
           </button>
