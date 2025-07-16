@@ -2,9 +2,8 @@
 import React, { useState } from 'react';
 import { Heart, MessageCircle, Share2, MapPin, Clock, TrendingUp } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { complaintsService } from '../services/complaintsService';
+import { serviceFactory } from '../services/ServiceFactory';
 import { useApi } from '../hooks/useApi';
-import { shouldUseMockData } from '../utils/mockData';
 
 const ComplaintFeed = () => {
   const navigate = useNavigate();
@@ -12,64 +11,7 @@ const ComplaintFeed = () => {
   const [categoryFilter, setCategoryFilter] = useState('');
 
   const { data: complaints, loading } = useApi<any>(
-    () => shouldUseMockData() 
-      ? Promise.resolve([
-    {
-      id: 1,
-      author: 'María González',
-      avatar: '👩‍💼',
-      time: '2 horas',
-      category: 'Salud',
-      location: 'Hospital Italiano, Palermo',
-      content: 'En el Hospital Italiano de Palermo la espera en guardia supera las 4 horas. Los pacientes con dolor están sin atención adecuada. Es urgente mejorar la cantidad de médicos de guardia.',
-      entities: [
-        { text: 'Hospital Italiano', type: 'institution' },
-        { text: 'Palermo', type: 'location' }
-      ],
-      likes: 47,
-      comments: 12,
-      shares: 8,
-      trending: true,
-      verified: true
-    },
-    {
-      id: 2,
-      author: 'Carlos Rodríguez',
-      avatar: '👨‍🔧',
-      time: '4 horas',
-      category: 'Transporte',
-      location: 'Plaza Italia, CABA',
-      content: 'Los colectivos de la línea 152 no respetan los horarios. Hace 45 minutos esperando en Plaza Italia. ANSES debería controlar mejor las concesiones.',
-      entities: [
-        { text: 'Plaza Italia', type: 'location' },
-        { text: 'ANSES', type: 'government' }
-      ],
-      likes: 23,
-      comments: 7,
-      shares: 4,
-      trending: false,
-      verified: false
-    },
-    {
-      id: 3,
-      author: 'Ana Martínez',
-      avatar: '👩‍🏫',
-      time: '6 horas',
-      category: 'Educación',
-      location: 'Escuela N°12, Belgrano',
-      content: 'La Escuela N°12 de Belgrano no tiene calefacción funcionando. Los chicos están con camperas en clase. El Ministerio de Educación debe actuar urgente.',
-      entities: [
-        { text: 'Belgrano', type: 'location' },
-        { text: 'Ministerio', type: 'government' }
-      ],
-      likes: 89,
-      comments: 23,
-      shares: 15,
-      trending: true,
-      verified: true
-    }
-  ])
-      : complaintsService.getComplaints({ trending: activeFilter === 'trending', category: categoryFilter }),
+    () => serviceFactory.getComplaintsService().getComplaints({ trending: activeFilter === 'trending', category: categoryFilter }),
     [activeFilter, categoryFilter]
   );
 

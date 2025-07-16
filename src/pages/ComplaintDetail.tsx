@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Heart, MessageCircle, Share2, MapPin, Clock, Flag } from 'lucide-react';
-import { localStorageService } from '../services/localStorageService';
+import { serviceFactory } from '../services/ServiceFactory';
 import { useApi } from '../hooks/useApi';
 import MainLayout from '../components/MainLayout';
 
@@ -41,7 +41,7 @@ const ComplaintDetail = () => {
     error 
   } = useApi<any>(
     () => {
-      const stored = localStorageService.getComplaint(id || '');
+      const stored = serviceFactory.getComplaintsService().getComplaint(id || '');
       return Promise.resolve(stored || mockComplaint);
     },
     [id]

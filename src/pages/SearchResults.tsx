@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { Search, Filter, Clock, MapPin } from 'lucide-react';
-import { localStorageService } from '../services/localStorageService';
+import { serviceFactory } from '../services/ServiceFactory';
 import { useApi } from '../hooks/useApi';
 import MainLayout from '../components/MainLayout';
 
@@ -20,7 +20,7 @@ const SearchResults = () => {
     loading, 
     error 
   } = useApi<any>(
-    () => Promise.resolve(localStorageService.searchComplaints(query, filters)),
+    () => serviceFactory.getComplaintsService().getComplaints({ query, ...filters }),
     [query, filters]
   );
 

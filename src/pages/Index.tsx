@@ -7,7 +7,7 @@ import DataVisualization from '../components/DataVisualization';
 import GamificationPanel from '../components/GamificationPanel';
 import StatsDashboard from '../components/StatsDashboard';
 import { useApi } from '../hooks/useApi';
-import { localStorageService } from '../services/localStorageService';
+import { serviceFactory } from '../services/ServiceFactory';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('feed');

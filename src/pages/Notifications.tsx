@@ -1,31 +1,37 @@
 import React, { useState } from 'react';
 import { Bell, Check, X, Clock, AlertCircle, CheckCircle, Info } from 'lucide-react';
 import MainLayout from '../components/MainLayout';
-import { localStorageService } from '../services/localStorageService';
+import { serviceFactory } from '../services/ServiceFactory';
+import { useEffect } from 'react';
 
 const Notifications = () => {
-  const [notifications, setNotifications] = useState(() => 
-    localStorageService.getNotifications()
-  );
+  const notificationService = serviceFactory.getNotificationService();
+  const [notifications, setNotifications] = useState<any[]>([]);
 
-  const markAsRead = (id: string) => {
-    localStorageService.markNotificationAsRead(id);
-    setNotifications(localStorageService.getNotifications());
-  };
+  useEffect(() => {
+    const loadNotifications = async () => {
+      const data = await notificationService.getNotifications();
+      setNotifications(data);
+    };
+    loadNotifications();
+  }, []);
 
-  const deleteNotification = (id: string) => {
-    const updated = notifications.filter(notif => notif.id !== id);
-    localStorageService.saveNotifications(updated);
+  const markAsRead = async (id: string) => {
+    await notificationService.markAsRead(id);
+    const updated = await notificationService.getNotifications();
     setNotifications(updated);
   };
 
-  const markAllAsRead = () => {
-    notifications.forEach(notif => {
-      if (!notif.read) {
-        localStorageService.markNotificationAsRead(notif.id);
-      }
-    });
-    setNotifications(localStorageService.getNotifications());
+  const deleteNotification = async (id: string) => {
+    await notificationService.deleteNotification(id);
+    const updated = await notificationService.getNotifications();
+    setNotifications(updated);
+  };
+
+  const markAllAsRead = async () => {
+    await notificationService.markAllAsRead();
+    const updated = await notificationService.getNotifications();
+    setNotifications(updated);
   };
 
   const getIcon = (type: string) => {

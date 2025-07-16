@@ -1,15 +1,31 @@
 import React, { useState } from 'react';
 import { Edit3, Settings, Bell, Shield, Award } from 'lucide-react';
 import MainLayout from '../components/MainLayout';
-import { localStorageService } from '../services/localStorageService';
+import { serviceFactory } from '../services/ServiceFactory';
 
 const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
-  const [profile, setProfile] = useState(() => localStorageService.getUserProfile());
+  const [profile, setProfile] = useState(() => {
+    // Get user profile from gamification service
+    const userProfile = serviceFactory.getGamificationService().getUserProfile();
+    return userProfile || {
+      name: 'Usuario',
+      email: 'usuario@ejemplo.com',
+      avatar: '',
+      transparencyPoints: 0,
+      level: 1,
+      rank: 0,
+      complaintsCount: 0,
+      resolutionsCount: 0,
+      badges: [],
+      achievements: []
+    };
+  });
 
   const handleSave = () => {
     setIsEditing(false);
-    localStorageService.updateUserProfile(profile);
+    // Update profile through gamification service
+    serviceFactory.getGamificationService().updateUserProfile(profile);
   };
 
   return (

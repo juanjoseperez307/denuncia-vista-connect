@@ -188,7 +188,7 @@ export class DatabaseService {
       {
         id: '1',
         author: 'María García',
-        avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=32&h=32&fit=crop&crop=face',
+        avatar: '👩‍💼',
         time: 'hace 2 horas',
         category: 'Transporte',
         location: 'Buenos Aires, CABA',
@@ -206,7 +206,7 @@ export class DatabaseService {
       {
         id: '2',
         author: 'Carlos Mendoza',
-        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face',
+        avatar: '👨‍🔧',
         time: 'hace 4 horas',
         category: 'Salud',
         location: 'Córdoba Capital',
