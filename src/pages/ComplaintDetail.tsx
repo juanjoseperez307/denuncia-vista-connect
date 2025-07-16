@@ -1,14 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Heart, MessageCircle, Share2, MapPin, Clock, Flag } from 'lucide-react';
 import { serviceFactory } from '../services/ServiceFactory';
 import { useApi } from '../hooks/useApi';
 import MainLayout from '../components/MainLayout';
+import { ComplaintComment } from '../services/interfaces/IComplaintsService';
 
 const ComplaintDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [newComment, setNewComment] = useState('');
+  const [comments, setComments] = useState<ComplaintComment[]>([]);
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
 
   const mockComplaint = {
     id: id || '1',
@@ -46,6 +49,44 @@ const ComplaintDetail = () => {
     },
     [id]
   );
+
+  // Load comments
+  useEffect(() => {
+    if (id) {
+      const loadComments = async () => {
+        try {
+          const loadedComments = await serviceFactory.getComplaintsService().getComments(id);
+          setComments(loadedComments);
+        } catch (error) {
+          console.error('Error loading comments:', error);
+        }
+      };
+      loadComments();
+    }
+  }, [id]);
+
+  const handleSubmitComment = async () => {
+    if (!newComment.trim() || !id) return;
+    
+    setIsSubmittingComment(true);
+    try {
+      const comment = await serviceFactory.getComplaintsService().addComment(id, newComment.trim());
+      setComments(prev => [...prev, comment]);
+      setNewComment('');
+      
+      // Add notification for the comment
+      await serviceFactory.getNotificationService().addNotification({
+        title: 'Nuevo comentario',
+        message: `Se agregó un comentario en el reclamo: "${complaint?.content?.substring(0, 50)}..."`,
+        type: 'info'
+      });
+      
+    } catch (error) {
+      console.error('Error submitting comment:', error);
+    } finally {
+      setIsSubmittingComment(false);
+    }
+  };
 
   if (loading) return <MainLayout><div className="text-center py-8">Cargando...</div></MainLayout>;
   if (error) return <MainLayout><div className="text-center py-8 text-destructive">Error al cargar el reclamo</div></MainLayout>;
@@ -130,7 +171,7 @@ const ComplaintDetail = () => {
 
           {/* Comments */}
           <div className="p-6">
-            <h3 className="font-semibold text-gray-800 mb-4">Comentarios ({(complaint as any).commentsList?.length || 0})</h3>
+            <h3 className="font-semibold text-gray-800 mb-4">Comentarios ({comments.length})</h3>
             
             {/* New Comment Form */}
             <div className="mb-6">
@@ -140,17 +181,26 @@ const ComplaintDetail = () => {
                 placeholder="Escribe un comentario..."
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none resize-none"
                 rows={3}
+                disabled={isSubmittingComment}
               />
               <div className="flex justify-end mt-2">
-                <button className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors">
-                  Comentar
+                <button 
+                  onClick={handleSubmitComment}
+                  disabled={isSubmittingComment || !newComment.trim()}
+                  className={`px-4 py-2 rounded-lg transition-colors ${
+                    isSubmittingComment || !newComment.trim()
+                      ? 'bg-gray-400 cursor-not-allowed'
+                      : 'bg-orange-600 hover:bg-orange-700'
+                  } text-white`}
+                >
+                  {isSubmittingComment ? 'Enviando...' : 'Comentar'}
                 </button>
               </div>
             </div>
 
             {/* Comments List */}
             <div className="space-y-4">
-              {(complaint as any).commentsList?.map((comment: any) => (
+              {comments.map((comment: ComplaintComment) => (
                 <div key={comment.id} className="border-l-4 border-gray-200 pl-4">
                   <div className="flex items-center space-x-2 mb-1">
                     <span className="font-medium text-gray-800">{comment.author}</span>
@@ -159,6 +209,11 @@ const ComplaintDetail = () => {
                   <p className="text-gray-700">{comment.content}</p>
                 </div>
               ))}
+              {comments.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  No hay comentarios aún. ¡Sé el primero en comentar!
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bell, Check, X, Clock, AlertCircle, CheckCircle, Info } from 'lucide-react';
 import MainLayout from '../components/MainLayout';
 import { serviceFactory } from '../services/ServiceFactory';
-import { useEffect } from 'react';
 
 const Notifications = () => {
   const notificationService = serviceFactory.getNotificationService();
@@ -13,7 +12,15 @@ const Notifications = () => {
       const data = await notificationService.getNotifications();
       setNotifications(data);
     };
+    
+    // Initial load
     loadNotifications();
+    
+    // Set up interval to check for new notifications every 1 second
+    const interval = setInterval(loadNotifications, 1000);
+    
+    // Cleanup interval on component unmount
+    return () => clearInterval(interval);
   }, []);
 
   const markAsRead = async (id: string) => {

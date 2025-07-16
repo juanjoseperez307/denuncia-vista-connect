@@ -41,9 +41,10 @@ const ComplaintForm = () => {
     setIsSubmitting(true);
     
     try {
+      const selectedCategory = categories.find(cat => cat.id === category);
       const complaintData: ComplaintFormData = {
         content: complaintText,
-        category,
+        category: selectedCategory ? selectedCategory.label : category,
         location,
         isAnonymous,
         files

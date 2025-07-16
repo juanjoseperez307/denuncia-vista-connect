@@ -7,11 +7,30 @@ import { useApi } from '../hooks/useApi';
 
 const ComplaintFeed = () => {
   const navigate = useNavigate();
-  const [activeFilter, setActiveFilter] = useState('trending');
+  const [activeFilter, setActiveFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('');
 
   const { data: complaints, loading } = useApi<any>(
-    () => serviceFactory.getComplaintsService().getComplaints({ trending: activeFilter === 'trending', category: categoryFilter }),
+    () => {
+      const filters: any = {};
+      
+      // Apply active filter
+      if (activeFilter === 'trending') {
+        filters.trending = true;
+      } else if (activeFilter === 'recent') {
+        filters.timeRange = 'recent';
+      } else if (activeFilter === 'nearby') {
+        filters.location = 'nearby';
+      }
+      // 'all' filter doesn't need any specific filter
+      
+      // Apply category filter
+      if (categoryFilter) {
+        filters.category = categoryFilter;
+      }
+      
+      return serviceFactory.getComplaintsService().getComplaints(filters);
+    },
     [activeFilter, categoryFilter]
   );
 
@@ -44,6 +63,16 @@ const ComplaintFeed = () => {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-gray-800">Feed de Reclamos</h2>
           <div className="flex space-x-2">
+            <button 
+              onClick={() => handleFilterClick('all')}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                activeFilter === 'all' 
+                  ? 'bg-orange-100 text-orange-800' 
+                  : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+              }`}
+            >
+              📋 Todos
+            </button>
             <button 
               onClick={() => handleFilterClick('trending')}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${

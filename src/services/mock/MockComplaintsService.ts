@@ -38,7 +38,9 @@ export class MockComplaintsService implements IComplaintsService {
       params.push(filters.offset);
     }
     
+    console.log(sql);
     const results = await databaseService.query(sql, params);
+    console.log(results);
     
     return results.map(row => ({
       id: row.id,
