@@ -114,28 +114,43 @@ const GamificationPanel = () => {
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-xl font-bold text-gray-800">Logros</h3>
-          <span className="text-sm text-gray-600">3 de 5 desbloqueados</span>
+          <span className="text-sm text-gray-600">
+            {achievements.filter(a => a.completed).length} de {achievements.length} desbloqueados
+          </span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {achievements.map((achievement, index) => (
             <div
-              key={index}
+              key={achievement.id}
               className={`border-2 rounded-lg p-4 transition-all hover:scale-105 ${
-                achievement.unlocked 
-                  ? `${getRarityColor(achievement.rarity)} shadow-md` 
+                achievement.completed 
+                  ? `bg-green-50 border-green-200 shadow-md` 
                   : 'bg-gray-50 text-gray-400 border-gray-200 opacity-60'
               }`}
             >
               <div className="text-center">
-                <div className={`text-3xl mb-2 ${achievement.unlocked ? '' : 'grayscale'}`}>
+                <div className={`text-3xl mb-2 ${achievement.completed ? '' : 'grayscale'}`}>
                   {achievement.icon}
                 </div>
-                <h4 className="font-semibold mb-1">{achievement.name}</h4>
+                <h4 className="font-semibold mb-1">{achievement.title}</h4>
                 <p className="text-xs mb-2">{achievement.description}</p>
-                <span className={`text-xs px-2 py-1 rounded-full border ${getRarityColor(achievement.rarity)}`}>
-                  {achievement.rarity.toUpperCase()}
-                </span>
+                <div className="mt-2">
+                  <div className="bg-gray-200 rounded-full h-2 mb-1">
+                    <div 
+                      className={`h-2 rounded-full ${achievement.completed ? 'bg-green-500' : 'bg-blue-500'}`}
+                      style={{ width: `${(achievement.progress / achievement.target) * 100}%` }}
+                    ></div>
+                  </div>
+                  <span className="text-xs text-gray-500">
+                    {achievement.progress}/{achievement.target}
+                  </span>
+                </div>
+                {achievement.completed && achievement.completedAt && (
+                  <div className="text-xs text-green-600 mt-1">
+                    Completado: {achievement.completedAt}
+                  </div>
+                )}
               </div>
             </div>
           ))}
@@ -197,15 +212,15 @@ const GamificationPanel = () => {
         <div className="mt-6 pt-4 border-t border-gray-200">
           <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
             <div className="flex items-center space-x-4">
-              <div className="text-2xl font-bold text-blue-600">#{currentUser.rank}</div>
+              <div className="text-2xl font-bold text-blue-600">#{currentUser?.level || 'N/A'}</div>
               <div>
-                <div className="font-semibold text-gray-800">{currentUser.name} (Tú)</div>
-                <div className="text-sm text-gray-600">{currentUser.level}</div>
+                <div className="font-semibold text-gray-800">{currentUser?.name || 'Usuario'} (Tú)</div>
+                <div className="text-sm text-gray-600">Nivel {currentUser?.level || 1}</div>
               </div>
             </div>
             <div className="text-right">
-              <div className="font-bold text-lg text-gray-800">{currentUser.points}</div>
-              <div className="text-sm text-gray-600">{currentUser.contributions} denuncias</div>
+              <div className="font-bold text-lg text-gray-800">{currentUser?.transparencyPoints?.toLocaleString() || 0}</div>
+              <div className="text-sm text-gray-600">{currentUser?.complaintsSubmitted || 0} denuncias</div>
             </div>
           </div>
         </div>

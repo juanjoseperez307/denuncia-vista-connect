@@ -21,25 +21,30 @@ const DataVisualization = () => {
           serviceFactory.getAnalyticsService().getTimelineData()
         ]);
 
-        setStats(complaintStats);
+        // Combine both stats for complete dashboard data
+        setStats({
+          ...complaintStats,
+          ...dashboardStats
+        });
         
         // Transform category stats to chart format
-        setCategoryData(categoryStats.map(cat => ({
+        const categoryColors = ['#EF4444', '#3B82F6', '#F59E0B', '#10B981', '#06B6D4', '#8B5CF6'];
+        setCategoryData(categoryStats.map((cat, index) => ({
           name: cat.name,
           value: cat.count,
-          color: cat.color
+          color: categoryColors[index % categoryColors.length]
         })));
 
         // Transform location stats to chart format
         setLocationData(locationStats.map(loc => ({
-          zona: loc.name,
+          zona: loc.location,
           denuncias: loc.count
         })));
 
         // Transform timeline data to chart format
         setTimelineData(timelineStats.map(item => ({
-          month: item.period,
-          denuncias: item.total,
+          month: item.date,
+          denuncias: item.complaints,
           resueltas: item.resolved
         })));
 
@@ -72,24 +77,24 @@ const DataVisualization = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div className="bg-gradient-to-br from-red-100 to-red-200 rounded-lg p-6 text-center">
-              <div className="text-3xl font-bold text-red-600 mb-2">{stats?.total?.toLocaleString()}</div>
+              <div className="text-3xl font-bold text-red-600 mb-2">{stats?.totalComplaints?.toLocaleString()}</div>
               <div className="text-sm text-red-800">Total Denuncias</div>
-              <div className="text-xs text-red-600 mt-1">Todas las categorías</div>
+              <div className="text-xs text-red-600 mt-1">↗️ +{stats?.trends?.complaints}% vs mes anterior</div>
             </div>
             <div className="bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg p-6 text-center">
-              <div className="text-3xl font-bold text-blue-600 mb-2">{stats?.inProgress?.toLocaleString()}</div>
-              <div className="text-sm text-blue-800">En Proceso</div>
-              <div className="text-xs text-blue-600 mt-1">{stats?.total > 0 ? Math.round((stats?.inProgress / stats?.total) * 100) : 0}% del total</div>
+              <div className="text-3xl font-bold text-blue-600 mb-2">{stats?.todayComplaints?.toLocaleString()}</div>
+              <div className="text-sm text-blue-800">Denuncias Hoy</div>
+              <div className="text-xs text-blue-600 mt-1">↗️ +8% vs ayer</div>
             </div>
             <div className="bg-gradient-to-br from-green-100 to-green-200 rounded-lg p-6 text-center">
               <div className="text-3xl font-bold text-green-600 mb-2">{stats?.resolved?.toLocaleString()}</div>
               <div className="text-sm text-green-800">Resueltas</div>
-              <div className="text-xs text-green-600 mt-1">{stats?.total > 0 ? Math.round((stats?.resolved / stats?.total) * 100) : 0}% del total</div>
+              <div className="text-xs text-green-600 mt-1">↗️ +{Math.abs(stats?.trends?.resolution || 0)}% vs mes anterior</div>
             </div>
             <div className="bg-gradient-to-br from-orange-100 to-orange-200 rounded-lg p-6 text-center">
               <div className="text-3xl font-bold text-orange-600 mb-2">{stats?.resolutionRate}%</div>
               <div className="text-sm text-orange-800">Tasa Resolución</div>
-              <div className="text-xs text-orange-600 mt-1">Promedio general</div>
+              <div className="text-xs text-orange-600 mt-1">↗️ +5% vs mes anterior</div>
             </div>
           </div>
         )}

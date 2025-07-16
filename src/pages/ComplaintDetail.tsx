@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Heart, MessageCircle, Share2, MapPin, Clock, Flag } from 'lucide-react';
+import { ArrowLeft, Heart, MessageCircle, Share2, MapPin, Clock, Flag, Edit3 } from 'lucide-react';
 import { serviceFactory } from '../services/ServiceFactory';
 import { useApi } from '../hooks/useApi';
 import MainLayout from '../components/MainLayout';
-import { ComplaintComment } from '../services/interfaces/IComplaintsService';
+import { ComplaintComment, ComplaintStatus } from '../services/interfaces/IComplaintsService';
 
 const ComplaintDetail = () => {
   const { id } = useParams();
@@ -12,6 +12,8 @@ const ComplaintDetail = () => {
   const [newComment, setNewComment] = useState('');
   const [comments, setComments] = useState<ComplaintComment[]>([]);
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [showStatusEditor, setShowStatusEditor] = useState(false);
 
   const mockComplaint = {
     id: id || '1',
@@ -86,6 +88,51 @@ const ComplaintDetail = () => {
     } finally {
       setIsSubmittingComment(false);
     }
+  };
+
+  const handleUpdateStatus = async (newStatus: ComplaintStatus) => {
+    if (!id) return;
+    
+    setIsUpdatingStatus(true);
+    try {
+      await serviceFactory.getComplaintsService().updateComplaintStatus(id, newStatus, 'Administrador');
+      
+      // Add notification for status change
+      await serviceFactory.getNotificationService().addNotification({
+        title: 'Estado actualizado',
+        message: `El reclamo cambió a estado: ${getStatusLabel(newStatus)}`,
+        type: 'success'
+      });
+      
+      setShowStatusEditor(false);
+      // Refresh the complaint data
+      window.location.reload();
+      
+    } catch (error) {
+      console.error('Error updating status:', error);
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  };
+
+  const getStatusLabel = (status: ComplaintStatus) => {
+    const labels = {
+      'pending': 'Pendiente',
+      'in-progress': 'En Proceso',
+      'resolved': 'Resuelto',
+      'rejected': 'Rechazado'
+    };
+    return labels[status] || status;
+  };
+
+  const getStatusColor = (status: ComplaintStatus) => {
+    const colors = {
+      'pending': 'bg-yellow-100 text-yellow-800',
+      'in-progress': 'bg-blue-100 text-blue-800',
+      'resolved': 'bg-green-100 text-green-800',
+      'rejected': 'bg-red-100 text-red-800'
+    };
+    return colors[status] || 'bg-gray-100 text-gray-800';
   };
 
   if (loading) return <MainLayout><div className="text-center py-8">Cargando...</div></MainLayout>;
@@ -167,6 +214,53 @@ const ComplaintDetail = () => {
                 <span>Reportar</span>
               </button>
             </div>
+          </div>
+
+          {/* Status Management */}
+          <div className="p-6 border-b">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-800">Estado del Reclamo</h3>
+              <button
+                onClick={() => setShowStatusEditor(!showStatusEditor)}
+                className="flex items-center space-x-2 px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                <Edit3 className="w-4 h-4" />
+                <span>Cambiar Estado</span>
+              </button>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(complaint.status || 'pending')}`}>
+                {getStatusLabel(complaint.status || 'pending')}
+              </span>
+              {complaint.statusUpdatedAt && (
+                <span className="text-sm text-gray-500">
+                  Actualizado: {complaint.statusUpdatedAt}
+                </span>
+              )}
+            </div>
+
+            {showStatusEditor && (
+              <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                <p className="text-sm text-gray-600 mb-3">Selecciona el nuevo estado:</p>
+                <div className="flex flex-wrap gap-2">
+                  {(['pending', 'in-progress', 'resolved', 'rejected'] as ComplaintStatus[]).map((status) => (
+                    <button
+                      key={status}
+                      onClick={() => handleUpdateStatus(status)}
+                      disabled={isUpdatingStatus || complaint.status === status}
+                      className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                        complaint.status === status
+                          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                          : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-100'
+                      }`}
+                    >
+                      {isUpdatingStatus ? 'Actualizando...' : getStatusLabel(status)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Comments */}
