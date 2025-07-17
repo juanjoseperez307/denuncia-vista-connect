@@ -8,59 +8,39 @@ export class MockGamificationService implements IGamificationService {
     const results = await databaseService.query('SELECT * FROM users WHERE id = ?', ['1']);
     
     if (results.length === 0) {
-      // Return default profile if user not found with updated stats
-      const baseTime = Date.now();
-      const timeVariation = Math.floor(baseTime / 5000) % 10; // Changes every 5 seconds
-      
+      // Return default profile if user not found
       return {
         id: '1',
-        name: 'Juan Pérez',
-        username: 'jperez',
-        email: 'juan.perez@ejemplo.com',
-        phone: '+54 11 1234-5678',
-        location: 'Palermo, Buenos Aires',
-        bio: 'Ciudadano comprometido con la transparencia y la mejora de la comunidad',
-        avatar: '👤',
-        transparencyPoints: 850 + (timeVariation * 10),
-        level: 4,
-        complaintsSubmitted: 12 + Math.floor(timeVariation / 2),
-        commentsGiven: 28 + timeVariation,
-        helpfulVotes: 45 + (timeVariation * 2),
-        nextLevelPoints: 1000,
-        pointsToNext: 150 - (timeVariation * 10),
-        rank: 8,
-        contributions: 12 + Math.floor(timeVariation / 2),
-        points: 850 + (timeVariation * 10),
-        change: timeVariation % 2 === 0 ? 5 : -2,
-        nextLevel: 5
+        name: 'Usuario',
+        email: 'usuario@ejemplo.com',
+        phone: '',
+        location: '',
+        bio: '',
+        avatar: '',
+        transparencyPoints: 0,
+        level: 1,
+        complaintsSubmitted: 0,
+        commentsGiven: 0,
+        helpfulVotes: 0,
+        nextLevelPoints: 500
       };
     }
     
     const user = results[0];
-    const baseTime = Date.now();
-    const timeVariation = Math.floor(baseTime / 5000) % 10;
-    
     return {
       id: user.id,
       name: user.name,
-      username: user.username || 'jperez',
       email: user.email,
       phone: user.phone,
       location: user.location,
       bio: user.bio,
       avatar: user.avatar,
-      transparencyPoints: user.transparency_points + (timeVariation * 5),
+      transparencyPoints: user.transparency_points,
       level: user.level,
-      complaintsSubmitted: user.complaints_submitted + Math.floor(timeVariation / 3),
-      commentsGiven: user.comments_given + Math.floor(timeVariation / 2),
-      helpfulVotes: user.helpful_votes + timeVariation,
-      nextLevelPoints: 500,
-      pointsToNext: Math.max(0, 500 - ((user.transparency_points + (timeVariation * 5)) % 500)),
-      rank: Math.max(1, 10 - Math.floor(timeVariation / 2)),
-      contributions: user.complaints_submitted + Math.floor(timeVariation / 3),
-      points: user.transparency_points + (timeVariation * 5),
-      change: timeVariation % 2 === 0 ? Math.floor(Math.random() * 10) + 1 : -Math.floor(Math.random() * 5) - 1,
-      nextLevel: user.level + 1
+      complaintsSubmitted: user.complaints_submitted,
+      commentsGiven: user.comments_given,
+      helpfulVotes: user.helpful_votes,
+      nextLevelPoints: 500
     };
   }
 

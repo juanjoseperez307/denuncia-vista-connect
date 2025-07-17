@@ -21,14 +21,7 @@ const Profile = () => {
       }
     };
 
-    // Initial load
     loadProfile();
-    
-    // Update user profile every second to reflect real-time changes
-    const interval = setInterval(loadProfile, 1000);
-    
-    // Cleanup interval on component unmount
-    return () => clearInterval(interval);
   }, []);
 
   const handleSave = async () => {

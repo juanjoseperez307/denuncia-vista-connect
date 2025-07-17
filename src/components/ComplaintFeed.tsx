@@ -5,19 +5,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { serviceFactory } from '../services/ServiceFactory';
 import { useApi } from '../hooks/useApi';
 import { ComplaintStatus } from '../services/interfaces/IComplaintsService';
-import ShareModal from './ShareModal';
-import { toast } from 'sonner';
 
 const ComplaintFeed = () => {
   const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('');
-  const [shareModal, setShareModal] = useState<{ isOpen: boolean; complaintId: string; title: string }>({
-    isOpen: false,
-    complaintId: '',
-    title: ''
-  });
-  const [likedComplaints, setLikedComplaints] = useState<Set<string>>(new Set());
 
   const { data: complaints, loading } = useApi<any>(
     () => {
@@ -83,65 +75,6 @@ const ComplaintFeed = () => {
       'rejected': 'Rechazado'
     };
     return labels[status] || status;
-  };
-
-  const handleLike = async (complaintId: string) => {
-    try {
-      const result = await serviceFactory.getComplaintsService().toggleLike(complaintId);
-      
-      if (result.liked) {
-        setLikedComplaints(prev => new Set([...prev, complaintId]));
-        toast.success('¡Me gusta agregado!');
-        // Award points for liking
-        await serviceFactory.getGamificationService().incrementUserStat('helpfulVotes');
-      } else {
-        setLikedComplaints(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(complaintId);
-          return newSet;
-        });
-        toast.info('Me gusta removido');
-      }
-    } catch (error) {
-      toast.error('Error al procesar el me gusta');
-    }
-  };
-
-  const handleShare = async (complaintId: string, title: string) => {
-    setShareModal({ isOpen: true, complaintId, title });
-  };
-
-  const executeShare = async (platform: string) => {
-    try {
-      await serviceFactory.getComplaintsService().shareComplaint(shareModal.complaintId);
-      
-      // Here you would integrate with actual sharing APIs
-      const url = `${window.location.origin}/complaint/${shareModal.complaintId}`;
-      const text = `Mira este reclamo: ${shareModal.title}`;
-      
-      switch (platform) {
-        case 'facebook':
-          window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
-          break;
-        case 'twitter':
-          window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
-          break;
-        case 'whatsapp':
-          window.open(`https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`, '_blank');
-          break;
-        case 'email':
-          window.open(`mailto:?subject=${encodeURIComponent('Reclamo importante')}&body=${encodeURIComponent(text + '\n\n' + url)}`, '_blank');
-          break;
-        case 'telegram':
-          window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`, '_blank');
-          break;
-      }
-      
-      // Award points for sharing
-      await serviceFactory.getGamificationService().awardPoints('1', 5, 'Compartir reclamo');
-    } catch (error) {
-      throw error;
-    }
   };
 
   return (
@@ -292,25 +225,15 @@ const ComplaintFeed = () => {
           <div className="border-t border-gray-100 px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-6">
-                <button 
-                  onClick={() => handleLike(complaint.id)}
-                  className={`flex items-center space-x-2 transition-colors group ${
-                    likedComplaints.has(complaint.id) 
-                      ? 'text-red-500' 
-                      : 'text-gray-600 hover:text-red-500'
-                  }`}
-                >
-                  <Heart className={`w-5 h-5 ${likedComplaints.has(complaint.id) ? 'fill-current' : 'group-hover:fill-current'}`} />
+                <button className="flex items-center space-x-2 text-gray-600 hover:text-red-500 transition-colors group">
+                  <Heart className="w-5 h-5 group-hover:fill-current" />
                   <span className="text-sm font-medium">{complaint.likes}</span>
                 </button>
                 <button className="flex items-center space-x-2 text-gray-600 hover:text-blue-500 transition-colors">
                   <MessageCircle className="w-5 h-5" />
                   <span className="text-sm font-medium">{complaint.comments}</span>
                 </button>
-                <button 
-                  onClick={() => handleShare(complaint.id, complaint.content.substring(0, 50) + '...')}
-                  className="flex items-center space-x-2 text-gray-600 hover:text-green-500 transition-colors"
-                >
+                <button className="flex items-center space-x-2 text-gray-600 hover:text-green-500 transition-colors">
                   <Share2 className="w-5 h-5" />
                   <span className="text-sm font-medium">{complaint.shares}</span>
                 </button>
@@ -336,14 +259,6 @@ const ComplaintFeed = () => {
           Cargar más reclamos
         </button>
       </div>
-
-      <ShareModal
-        isOpen={shareModal.isOpen}
-        onClose={() => setShareModal({ isOpen: false, complaintId: '', title: '' })}
-        complaintId={shareModal.complaintId}
-        complaintTitle={shareModal.title}
-        onShare={executeShare}
-      />
     </div>
   );
 };

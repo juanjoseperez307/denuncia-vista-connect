@@ -74,7 +74,7 @@ export interface IComplaintsService {
   
   // Interactions
   toggleLike(id: string): Promise<{ liked: boolean; totalLikes: number }>;
-  shareComplaint(id: string, platform?: string): Promise<{ shareUrl: string; totalShares: number }>;
+  shareComplaint(id: string): Promise<{ shareUrl: string }>;
   
   // Comments
   getComments(complaintId: string): Promise<ComplaintComment[]>;

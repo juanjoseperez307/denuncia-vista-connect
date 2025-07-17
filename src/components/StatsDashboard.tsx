@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { TrendingUp, Users, Clock, CheckCircle, AlertTriangle, MapPin } from 'lucide-react';
 import { serviceFactory } from '../services/ServiceFactory';
-import { toast } from 'sonner';
 
 const StatsDashboard = () => {
   const [stats, setStats] = useState([
@@ -139,39 +138,6 @@ const StatsDashboard = () => {
     return '✅';
   };
 
-  const handleGenerateReport = async () => {
-    try {
-      toast.info('Generando reporte semanal...');
-      // Mock API call for report generation
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      toast.success('Reporte generado exitosamente y enviado por email');
-    } catch (error) {
-      toast.error('Error al generar el reporte');
-    }
-  };
-
-  const handleAdvancedAnalysis = async () => {
-    try {
-      toast.info('Iniciando análisis avanzado...');
-      // Mock API call for advanced analysis
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      toast.success('Análisis completado. Se detectaron 3 patrones nuevos');
-    } catch (error) {
-      toast.error('Error en el análisis avanzado');
-    }
-  };
-
-  const handleNotifyAuthorities = async () => {
-    try {
-      toast.info('Enviando notificación a autoridades...');
-      // Mock API call for notifying authorities
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      toast.success('Autoridades notificadas sobre casos urgentes');
-    } catch (error) {
-      toast.error('Error al notificar autoridades');
-    }
-  };
-
   return (
     <div className="space-y-6">
       {/* Main Stats Grid */}
@@ -267,10 +233,7 @@ const StatsDashboard = () => {
       <div className="bg-white rounded-lg shadow-md p-6">
         <h3 className="text-xl font-bold text-gray-800 mb-6">Acciones Rápidas</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <button 
-            onClick={() => handleGenerateReport()}
-            className="flex items-center justify-center space-x-3 p-4 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg transition-colors group"
-          >
+          <button className="flex items-center justify-center space-x-3 p-4 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg transition-colors group">
             <div className="text-2xl">📊</div>
             <div className="text-left">
               <p className="font-medium text-blue-800">Generar Reporte</p>
@@ -278,10 +241,7 @@ const StatsDashboard = () => {
             </div>
           </button>
 
-          <button 
-            onClick={() => handleAdvancedAnalysis()}
-            className="flex items-center justify-center space-x-3 p-4 bg-green-50 hover:bg-green-100 border border-green-200 rounded-lg transition-colors group"
-          >
+          <button className="flex items-center justify-center space-x-3 p-4 bg-green-50 hover:bg-green-100 border border-green-200 rounded-lg transition-colors group">
             <div className="text-2xl">🔍</div>
             <div className="text-left">
               <p className="font-medium text-green-800">Análisis Avanzado</p>
@@ -289,10 +249,7 @@ const StatsDashboard = () => {
             </div>
           </button>
 
-          <button 
-            onClick={() => handleNotifyAuthorities()}
-            className="flex items-center justify-center space-x-3 p-4 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-lg transition-colors group"
-          >
+          <button className="flex items-center justify-center space-x-3 p-4 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-lg transition-colors group">
             <div className="text-2xl">📧</div>
             <div className="text-left">
               <p className="font-medium text-orange-800">Notificar Autoridades</p>
