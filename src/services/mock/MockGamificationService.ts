@@ -8,7 +8,22 @@ export class MockGamificationService implements IGamificationService {
     const results = await databaseService.query('SELECT * FROM users WHERE id = ?', ['1']);
     
     if (results.length === 0) {
-      throw new Error('User not found');
+      // Return default profile if user not found
+      return {
+        id: '1',
+        name: 'Usuario',
+        email: 'usuario@ejemplo.com',
+        phone: '',
+        location: '',
+        bio: '',
+        avatar: '',
+        transparencyPoints: 0,
+        level: 1,
+        complaintsSubmitted: 0,
+        commentsGiven: 0,
+        helpfulVotes: 0,
+        nextLevelPoints: 500
+      };
     }
     
     const user = results[0];
@@ -24,7 +39,8 @@ export class MockGamificationService implements IGamificationService {
       level: user.level,
       complaintsSubmitted: user.complaints_submitted,
       commentsGiven: user.comments_given,
-      helpfulVotes: user.helpful_votes
+      helpfulVotes: user.helpful_votes,
+      nextLevelPoints: 500
     };
   }
 

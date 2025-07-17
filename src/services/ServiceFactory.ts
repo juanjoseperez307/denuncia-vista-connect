@@ -76,9 +76,3 @@ class ServiceFactory {
 }
 
 export const serviceFactory = new ServiceFactory();
-
-// Export convenient service getters
-export const complaintsService = serviceFactory.getComplaintsService();
-export const analyticsService = serviceFactory.getAnalyticsService();
-export const gamificationService = serviceFactory.getGamificationService();
-export const notificationService = serviceFactory.getNotificationService();

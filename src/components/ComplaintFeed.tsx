@@ -2,74 +2,36 @@
 import React, { useState } from 'react';
 import { Heart, MessageCircle, Share2, MapPin, Clock, TrendingUp } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { complaintsService } from '../services/complaintsService';
+import { serviceFactory } from '../services/ServiceFactory';
 import { useApi } from '../hooks/useApi';
-import { shouldUseMockData } from '../utils/mockData';
+import { ComplaintStatus } from '../services/interfaces/IComplaintsService';
 
 const ComplaintFeed = () => {
   const navigate = useNavigate();
-  const [activeFilter, setActiveFilter] = useState('trending');
+  const [activeFilter, setActiveFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('');
 
   const { data: complaints, loading } = useApi<any>(
-    () => shouldUseMockData() 
-      ? Promise.resolve([
-    {
-      id: 1,
-      author: 'María González',
-      avatar: '👩‍💼',
-      time: '2 horas',
-      category: 'Salud',
-      location: 'Hospital Italiano, Palermo',
-      content: 'En el Hospital Italiano de Palermo la espera en guardia supera las 4 horas. Los pacientes con dolor están sin atención adecuada. Es urgente mejorar la cantidad de médicos de guardia.',
-      entities: [
-        { text: 'Hospital Italiano', type: 'institution' },
-        { text: 'Palermo', type: 'location' }
-      ],
-      likes: 47,
-      comments: 12,
-      shares: 8,
-      trending: true,
-      verified: true
+    () => {
+      const filters: any = {};
+      
+      // Apply active filter
+      if (activeFilter === 'trending') {
+        filters.trending = true;
+      } else if (activeFilter === 'recent') {
+        filters.timeRange = 'recent';
+      } else if (activeFilter === 'nearby') {
+        filters.location = 'nearby';
+      }
+      // 'all' filter doesn't need any specific filter
+      
+      // Apply category filter
+      if (categoryFilter) {
+        filters.category = categoryFilter;
+      }
+      
+      return serviceFactory.getComplaintsService().getComplaints(filters);
     },
-    {
-      id: 2,
-      author: 'Carlos Rodríguez',
-      avatar: '👨‍🔧',
-      time: '4 horas',
-      category: 'Transporte',
-      location: 'Plaza Italia, CABA',
-      content: 'Los colectivos de la línea 152 no respetan los horarios. Hace 45 minutos esperando en Plaza Italia. ANSES debería controlar mejor las concesiones.',
-      entities: [
-        { text: 'Plaza Italia', type: 'location' },
-        { text: 'ANSES', type: 'government' }
-      ],
-      likes: 23,
-      comments: 7,
-      shares: 4,
-      trending: false,
-      verified: false
-    },
-    {
-      id: 3,
-      author: 'Ana Martínez',
-      avatar: '👩‍🏫',
-      time: '6 horas',
-      category: 'Educación',
-      location: 'Escuela N°12, Belgrano',
-      content: 'La Escuela N°12 de Belgrano no tiene calefacción funcionando. Los chicos están con camperas en clase. El Ministerio de Educación debe actuar urgente.',
-      entities: [
-        { text: 'Belgrano', type: 'location' },
-        { text: 'Ministerio', type: 'government' }
-      ],
-      likes: 89,
-      comments: 23,
-      shares: 15,
-      trending: true,
-      verified: true
-    }
-  ])
-      : complaintsService.getComplaints({ trending: activeFilter === 'trending', category: categoryFilter }),
     [activeFilter, categoryFilter]
   );
 
@@ -95,6 +57,26 @@ const ComplaintFeed = () => {
     return colors[category] || 'bg-gray-100 text-gray-800';
   };
 
+  const getStatusColor = (status: ComplaintStatus) => {
+    const colors = {
+      'pending': 'bg-yellow-100 text-yellow-800',
+      'in-progress': 'bg-blue-100 text-blue-800',
+      'resolved': 'bg-green-100 text-green-800',
+      'rejected': 'bg-red-100 text-red-800'
+    };
+    return colors[status] || 'bg-gray-100 text-gray-800';
+  };
+
+  const getStatusLabel = (status: ComplaintStatus) => {
+    const labels = {
+      'pending': 'Pendiente',
+      'in-progress': 'En Proceso',
+      'resolved': 'Resuelto',
+      'rejected': 'Rechazado'
+    };
+    return labels[status] || status;
+  };
+
   return (
     <div className="space-y-6">
       {/* Feed Header */}
@@ -102,6 +84,16 @@ const ComplaintFeed = () => {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-gray-800">Feed de Reclamos</h2>
           <div className="flex space-x-2">
+            <button 
+              onClick={() => handleFilterClick('all')}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                activeFilter === 'all' 
+                  ? 'bg-orange-100 text-orange-800' 
+                  : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+              }`}
+            >
+              📋 Todos
+            </button>
             <button 
               onClick={() => handleFilterClick('trending')}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
@@ -199,9 +191,14 @@ const ComplaintFeed = () => {
                   </div>
                 </div>
               </div>
-              <span className={`px-3 py-1 rounded-full text-xs font-medium ${getCategoryColor(complaint.category)}`}>
-                {complaint.category}
-              </span>
+              <div className="flex flex-col space-y-2">
+                <span className={`px-3 py-1 rounded-full text-xs font-medium ${getCategoryColor(complaint.category)}`}>
+                  {complaint.category}
+                </span>
+                <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(complaint.status || 'pending')}`}>
+                  {getStatusLabel(complaint.status || 'pending')}
+                </span>
+              </div>
             </div>
 
             {/* Complaint Content */}

@@ -15,7 +15,12 @@ export class DatabaseService {
     // Try to load existing database from localStorage
     const savedDb = localStorage.getItem('transparencia_db');
     if (savedDb) {
-      const uint8Array = new Uint8Array(Buffer.from(savedDb, 'base64'));
+      // Convert base64 to Uint8Array using browser APIs
+      const binaryString = atob(savedDb);
+      const uint8Array = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        uint8Array[i] = binaryString.charCodeAt(i);
+      }
       this.db = new this.SQL.Database(uint8Array);
     } else {
       // Create new database
@@ -63,6 +68,9 @@ export class DatabaseService {
         verified BOOLEAN DEFAULT FALSE,
         is_anonymous BOOLEAN DEFAULT FALSE,
         files TEXT, -- JSON string
+        status TEXT DEFAULT 'pending',
+        status_updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        status_updated_by TEXT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       );
@@ -188,7 +196,7 @@ export class DatabaseService {
       {
         id: '1',
         author: 'María García',
-        avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=32&h=32&fit=crop&crop=face',
+        avatar: '👩‍💼',
         time: 'hace 2 horas',
         category: 'Transporte',
         location: 'Buenos Aires, CABA',
@@ -206,7 +214,7 @@ export class DatabaseService {
       {
         id: '2',
         author: 'Carlos Mendoza',
-        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face',
+        avatar: '👨‍🔧',
         time: 'hace 4 horas',
         category: 'Salud',
         location: 'Córdoba Capital',
@@ -292,8 +300,13 @@ export class DatabaseService {
 
   private save(): void {
     const data = this.db.export();
-    const buffer = Buffer.from(data);
-    localStorage.setItem('transparencia_db', buffer.toString('base64'));
+    // Convert Uint8Array to base64 using browser APIs
+    let binaryString = '';
+    for (let i = 0; i < data.length; i++) {
+      binaryString += String.fromCharCode(data[i]);
+    }
+    const base64String = btoa(binaryString);
+    localStorage.setItem('transparencia_db', base64String);
   }
 
   async close(): Promise<void> {
