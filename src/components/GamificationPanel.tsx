@@ -106,16 +106,16 @@ const GamificationPanel = () => {
 
         <div className="grid grid-cols-3 gap-4 text-center">
           <div>
-            <div className="text-xl font-bold">#{currentUser.rank}</div>
-            <div className="text-sm opacity-90">Ranking</div>
+            <div className="text-xl font-bold">{currentUser?.complaintsSubmitted || 0}</div>
+            <div className="text-sm opacity-90">Reclamos Enviados</div>
           </div>
           <div>
-            <div className="text-xl font-bold">{currentUser.contributions}</div>
-            <div className="text-sm opacity-90">Denuncias</div>
+            <div className="text-xl font-bold">{currentUser?.commentsGiven || 0}</div>
+            <div className="text-sm opacity-90">Comentarios</div>
           </div>
           <div>
-            <div className="text-xl font-bold">89%</div>
-            <div className="text-sm opacity-90">Precisión</div>
+            <div className="text-xl font-bold">{currentUser?.helpfulVotes || 0}</div>
+            <div className="text-sm opacity-90">Votos Útiles</div>
           </div>
         </div>
       </div>

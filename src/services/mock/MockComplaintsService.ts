@@ -202,12 +202,22 @@ export class MockComplaintsService implements IComplaintsService {
     return { liked: true, totalLikes: newLikes };
   }
 
-  async shareComplaint(id: string): Promise<{ shareUrl: string }> {
+  async shareComplaint(id: string, platform?: string): Promise<{ shareUrl: string; totalShares: number }> {
     await databaseService.execute(`
       UPDATE complaints SET shares = shares + 1 WHERE id = ?
     `, [id]);
     
-    return { shareUrl: `${window.location.origin}/complaint/${id}` };
+    // Get updated share count
+    const results = await databaseService.query(`
+      SELECT shares FROM complaints WHERE id = ?
+    `, [id]);
+    
+    const totalShares = results.length > 0 ? results[0].shares : 0;
+    
+    return {
+      shareUrl: `${window.location.origin}/complaint/${id}`,
+      totalShares
+    };
   }
 
   async getComments(complaintId: string): Promise<ComplaintComment[]> {
