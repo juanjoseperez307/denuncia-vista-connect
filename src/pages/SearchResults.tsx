@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { Search, Filter, Clock, MapPin } from 'lucide-react';
-import { localStorageService } from '../services/localStorageService';
+import { serviceFactory } from '../services/ServiceFactory';
 import { useApi } from '../hooks/useApi';
 import MainLayout from '../components/MainLayout';
 
@@ -20,7 +20,19 @@ const SearchResults = () => {
     loading, 
     error 
   } = useApi<any>(
-    () => Promise.resolve(localStorageService.searchComplaints(query, filters)),
+    async () => {
+      if (query.trim()) {
+        return await serviceFactory.getComplaintsService().searchComplaints(query, filters);
+      } else {
+        const complaints = await serviceFactory.getComplaintsService().getComplaints(filters);
+        return {
+          complaints,
+          totalResults: complaints.length,
+          suggestions: [],
+          filters: { categories: [], locations: [] }
+        };
+      }
+    },
     [query, filters]
   );
 
@@ -186,7 +198,7 @@ const SearchResults = () => {
                           to={`/complaint/${complaint.id}`}
                           className="text-lg font-semibold text-gray-800 hover:text-orange-600 transition-colors"
                         >
-                          {complaint.title}
+                          {complaint.content.substring(0, 100)}...
                         </Link>
                         <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
                           {complaint.category}

@@ -1,4 +1,6 @@
 // Interface for complaints service
+export type ComplaintStatus = 'pending' | 'in-progress' | 'resolved' | 'rejected';
+
 export interface Complaint {
   id: string;
   author: string;
@@ -19,6 +21,9 @@ export interface Complaint {
   verified: boolean;
   isAnonymous?: boolean;
   files?: string[];
+  status: ComplaintStatus;
+  statusUpdatedAt?: string;
+  statusUpdatedBy?: string;
 }
 
 export interface ComplaintFormData {
@@ -54,6 +59,18 @@ export interface IComplaintsService {
   createComplaint(complaintData: ComplaintFormData): Promise<Complaint>;
   updateComplaint(id: string, data: Partial<ComplaintFormData>): Promise<Complaint>;
   deleteComplaint(id: string): Promise<void>;
+  
+  // Status management
+  updateComplaintStatus(id: string, status: ComplaintStatus, updatedBy?: string): Promise<Complaint>;
+  getComplaintsByStatus(status: ComplaintStatus): Promise<Complaint[]>;
+  getComplaintStats(): Promise<{
+    total: number;
+    pending: number;
+    inProgress: number;
+    resolved: number;
+    rejected: number;
+    resolutionRate: number;
+  }>;
   
   // Interactions
   toggleLike(id: string): Promise<{ liked: boolean; totalLikes: number }>;

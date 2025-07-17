@@ -1,16 +1,60 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Edit3, Settings, Bell, Shield, Award } from 'lucide-react';
 import MainLayout from '../components/MainLayout';
-import { localStorageService } from '../services/localStorageService';
+import { serviceFactory } from '../services/ServiceFactory';
+import { UserProfile } from '../services/interfaces/IGamificationService';
 
 const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
-  const [profile, setProfile] = useState(() => localStorageService.getUserProfile());
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const handleSave = () => {
-    setIsEditing(false);
-    localStorageService.updateUserProfile(profile);
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const userProfile = await serviceFactory.getGamificationService().getUserProfile();
+        setProfile(userProfile);
+      } catch (error) {
+        console.error('Error loading profile:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProfile();
+  }, []);
+
+  const handleSave = async () => {
+    if (!profile) return;
+    
+    try {
+      setIsEditing(false);
+      const updatedProfile = await serviceFactory.getGamificationService().updateUserProfile(profile);
+      setProfile(updatedProfile);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+    }
   };
+
+  if (loading) {
+    return (
+      <MainLayout>
+        <div className="flex justify-center items-center h-64">
+          <div className="text-lg">Cargando perfil...</div>
+        </div>
+      </MainLayout>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <MainLayout>
+        <div className="flex justify-center items-center h-64">
+          <div className="text-lg text-red-600">Error al cargar el perfil</div>
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>
@@ -30,7 +74,7 @@ const Profile = () => {
               </div>
 
               <div className="flex items-start space-x-6 mb-8">
-                <div className="text-6xl">{profile.avatar}</div>
+                <div className="text-6xl">{profile.avatar || '👤'}</div>
                 <div className="flex-1">
                   {isEditing ? (
                     <div className="space-y-4">
@@ -119,14 +163,14 @@ const Profile = () => {
                 <div className="text-sm text-muted-foreground mb-4">
                   {profile.transparencyPoints.toLocaleString()} Puntos de Transparencia
                 </div>
-                <div className="bg-muted rounded-full h-2 mb-2">
+                <div className="bg-gray-200 rounded-full h-2 mb-2">
                   <div 
                     className="bg-gradient-to-r from-purple-500 via-violet-500 to-indigo-500 h-2 rounded-full" 
-                    style={{ width: '65%' }}
+                    style={{ width: `${(profile.transparencyPoints % profile.nextLevelPoints) / profile.nextLevelPoints * 100}%` }}
                   ></div>
                 </div>
                 <div className="text-xs text-gray-500">
-                  350 puntos para el próximo nivel
+                  {profile.nextLevelPoints - (profile.transparencyPoints % profile.nextLevelPoints)} puntos para el próximo nivel
                 </div>
               </div>
             </div>
