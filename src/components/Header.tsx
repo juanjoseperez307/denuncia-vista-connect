@@ -1,8 +1,7 @@
 
 import React, { useState } from 'react';
-import { Search, User, Menu } from 'lucide-react';
+import { Search, Bell, User, Menu } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
-import NotificationBell from './NotificationBell';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -47,7 +46,12 @@ const Header = () => {
           {/* Right Section */}
           <div className="flex items-center space-x-4">
             {/* Notifications */}
-            <NotificationBell />
+            <Link to="/notifications" className="relative p-2 text-gray-600 hover:text-orange-600 transition-colors">
+              <Bell className="w-6 h-6" />
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                3
+              </span>
+            </Link>
 
             {/* User Profile */}
             <div className="flex items-center space-x-3">

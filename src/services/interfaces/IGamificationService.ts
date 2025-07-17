@@ -12,7 +12,6 @@ export interface UserProfile {
   complaintsSubmitted: number;
   commentsGiven: number;
   helpfulVotes: number;
-  nextLevelPoints: 500;
 }
 
 export interface Badge {

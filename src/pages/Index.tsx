@@ -7,7 +7,7 @@ import DataVisualization from '../components/DataVisualization';
 import GamificationPanel from '../components/GamificationPanel';
 import StatsDashboard from '../components/StatsDashboard';
 import { useApi } from '../hooks/useApi';
-import { serviceFactory } from '../services/ServiceFactory';
+import { localStorageService } from '../services/localStorageService';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('feed');
@@ -18,7 +18,7 @@ const Index = () => {
     loading: statsLoading, 
     error: statsError 
   } = useApi(
-    () => Promise.resolve(serviceFactory.getAnalyticsService().getDashboardStats()),
+    () => Promise.resolve(localStorageService.getStats()),
     []
   );
 
@@ -26,7 +26,7 @@ const Index = () => {
     data: trendingTopics, 
     loading: trendsLoading 
   } = useApi(
-    () => Promise.resolve(serviceFactory.getAnalyticsService().getTrendingTopics()),
+    () => Promise.resolve(localStorageService.getTrendingTopics()),
     []
   );
 
@@ -35,7 +35,7 @@ const Index = () => {
     loading: userLoading 
   } = useApi(
     () => Promise.resolve({
-      ...serviceFactory.getGamificationService().getUserProfile(),
+      ...localStorageService.getUserProfile(),
       nextLevelPoints: 500
     }),
     []

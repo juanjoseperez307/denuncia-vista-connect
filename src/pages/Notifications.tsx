@@ -1,44 +1,31 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Bell, Check, X, Clock, AlertCircle, CheckCircle, Info } from 'lucide-react';
 import MainLayout from '../components/MainLayout';
-import { serviceFactory } from '../services/ServiceFactory';
+import { localStorageService } from '../services/localStorageService';
 
 const Notifications = () => {
-  const notificationService = serviceFactory.getNotificationService();
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState(() => 
+    localStorageService.getNotifications()
+  );
 
-  useEffect(() => {
-    const loadNotifications = async () => {
-      const data = await notificationService.getNotifications();
-      setNotifications(data);
-    };
-    
-    // Initial load
-    loadNotifications();
-    
-    // Set up interval to check for new notifications every 1 second
-    const interval = setInterval(loadNotifications, 1000);
-    
-    // Cleanup interval on component unmount
-    return () => clearInterval(interval);
-  }, []);
+  const markAsRead = (id: string) => {
+    localStorageService.markNotificationAsRead(id);
+    setNotifications(localStorageService.getNotifications());
+  };
 
-  const markAsRead = async (id: string) => {
-    await notificationService.markAsRead(id);
-    const updated = await notificationService.getNotifications();
+  const deleteNotification = (id: string) => {
+    const updated = notifications.filter(notif => notif.id !== id);
+    localStorageService.saveNotifications(updated);
     setNotifications(updated);
   };
 
-  const deleteNotification = async (id: string) => {
-    await notificationService.deleteNotification(id);
-    const updated = await notificationService.getNotifications();
-    setNotifications(updated);
-  };
-
-  const markAllAsRead = async () => {
-    await notificationService.markAllAsRead();
-    const updated = await notificationService.getNotifications();
-    setNotifications(updated);
+  const markAllAsRead = () => {
+    notifications.forEach(notif => {
+      if (!notif.read) {
+        localStorageService.markNotificationAsRead(notif.id);
+      }
+    });
+    setNotifications(localStorageService.getNotifications());
   };
 
   const getIcon = (type: string) => {

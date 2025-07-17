@@ -1,5 +1,5 @@
 // Mock implementation of complaints service using SQL.js database
-import { IComplaintsService, Complaint, ComplaintFormData, ComplaintFilters, ComplaintComment, ComplaintStatus } from '../interfaces/IComplaintsService';
+import { IComplaintsService, Complaint, ComplaintFormData, ComplaintFilters, ComplaintComment } from '../interfaces/IComplaintsService';
 import { databaseService } from '../database/DatabaseService';
 
 export class MockComplaintsService implements IComplaintsService {
@@ -38,9 +38,7 @@ export class MockComplaintsService implements IComplaintsService {
       params.push(filters.offset);
     }
     
-    console.log(sql);
     const results = await databaseService.query(sql, params);
-    console.log(results);
     
     return results.map(row => ({
       id: row.id,
@@ -57,10 +55,7 @@ export class MockComplaintsService implements IComplaintsService {
       trending: !!row.trending,
       verified: !!row.verified,
       isAnonymous: !!row.is_anonymous,
-      files: row.files ? JSON.parse(row.files) : [],
-      status: row.status as ComplaintStatus,
-      statusUpdatedAt: row.status_updated_at,
-      statusUpdatedBy: row.status_updated_by
+      files: row.files ? JSON.parse(row.files) : []
     }));
   }
 
@@ -90,10 +85,7 @@ export class MockComplaintsService implements IComplaintsService {
       trending: !!row.trending,
       verified: !!row.verified,
       isAnonymous: !!row.is_anonymous,
-      files: row.files ? JSON.parse(row.files) : [],
-      status: row.status as ComplaintStatus,
-      statusUpdatedAt: row.status_updated_at,
-      statusUpdatedBy: row.status_updated_by
+      files: row.files ? JSON.parse(row.files) : []
     };
   }
 
@@ -117,15 +109,12 @@ export class MockComplaintsService implements IComplaintsService {
       trending: false,
       verified: false,
       isAnonymous: complaintData.isAnonymous,
-      files: complaintData.files ? complaintData.files.map(f => f.name) : [],
-      status: 'pending',
-      statusUpdatedAt: now,
-      statusUpdatedBy: "author"
+      files: complaintData.files ? complaintData.files.map(f => f.name) : []
     };
 
     await databaseService.execute(`
-      INSERT INTO complaints (id, author, avatar, time, category, location, content, entities, likes, comments, shares, trending, verified, is_anonymous, files, status, status_updated_at, status_updated_by)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO complaints (id, author, avatar, time, category, location, content, entities, likes, comments, shares, trending, verified, is_anonymous, files)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, [
       complaint.id,
       complaint.author,
@@ -141,10 +130,7 @@ export class MockComplaintsService implements IComplaintsService {
       complaint.trending,
       complaint.verified,
       complaint.isAnonymous,
-      JSON.stringify(complaint.files),
-      complaint.status,
-      complaint.statusUpdatedAt,
-      complaint.statusUpdatedBy
+      JSON.stringify(complaint.files)
     ]);
 
     // Update user stats
@@ -297,10 +283,7 @@ export class MockComplaintsService implements IComplaintsService {
         trending: !!row.trending,
         verified: !!row.verified,
         isAnonymous: !!row.is_anonymous,
-        files: row.files ? JSON.parse(row.files) : [],
-        status: row.status as ComplaintStatus,
-        statusUpdatedAt: row.status_updated_at,
-        statusUpdatedBy: row.status_updated_by
+        files: row.files ? JSON.parse(row.files) : []
       })),
       totalResults: complaints.length,
       suggestions: categories.map(c => c.category).slice(0, 5),
@@ -346,78 +329,5 @@ export class MockComplaintsService implements IComplaintsService {
     });
     
     return entities;
-  }
-
-  async updateComplaintStatus(id: string, status: ComplaintStatus, updatedBy?: string): Promise<Complaint> {
-    const now = new Date().toISOString();
-    
-    await databaseService.execute(`
-      UPDATE complaints 
-      SET status = ?, status_updated_at = ?, status_updated_by = ? 
-      WHERE id = ?
-    `, [status, now, updatedBy, id]);
-    
-    return this.getComplaint(id);
-  }
-
-  async getComplaintsByStatus(status: ComplaintStatus): Promise<Complaint[]> {
-    const results = await databaseService.query(
-      'SELECT * FROM complaints WHERE status = ? ORDER BY created_at DESC',
-      [status]
-    );
-    
-    return results.map(row => ({
-      id: row.id,
-      author: row.author,
-      avatar: row.avatar,
-      time: row.time,
-      category: row.category,
-      location: row.location,
-      content: row.content,
-      entities: row.entities ? JSON.parse(row.entities) : [],
-      likes: row.likes,
-      comments: row.comments,
-      shares: row.shares,
-      trending: !!row.trending,
-      verified: !!row.verified,
-      isAnonymous: !!row.is_anonymous,
-      files: row.files ? JSON.parse(row.files) : [],
-      status: row.status as ComplaintStatus,
-      statusUpdatedAt: row.status_updated_at,
-      statusUpdatedBy: row.status_updated_by
-    }));
-  }
-
-  async getComplaintStats(): Promise<{
-    total: number;
-    pending: number;
-    inProgress: number;
-    resolved: number;
-    rejected: number;
-    resolutionRate: number;
-  }> {
-    const stats = await databaseService.query(`
-      SELECT 
-        COUNT(*) as total,
-        SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
-        SUM(CASE WHEN status = 'in-progress' THEN 1 ELSE 0 END) as inProgress,
-        SUM(CASE WHEN status = 'resolved' THEN 1 ELSE 0 END) as resolved,
-        SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) as rejected
-      FROM complaints
-    `);
-    
-    const result = stats[0];
-    const total = result.total || 0;
-    const resolved = result.resolved || 0;
-    const resolutionRate = total > 0 ? Math.round((resolved / total) * 100) : 0;
-    
-    return {
-      total,
-      pending: result.pending || 0,
-      inProgress: result.inProgress || 0,
-      resolved,
-      rejected: result.rejected || 0,
-      resolutionRate
-    };
   }
 }
