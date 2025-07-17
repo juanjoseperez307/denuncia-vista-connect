@@ -52,8 +52,8 @@ export class RealComplaintsService implements IComplaintsService {
     return apiService.post(`/complaints/${id}/like`, {});
   }
 
-  async shareComplaint(id: string): Promise<{ shareUrl: string }> {
-    return apiService.post(`/complaints/${id}/share`, {});
+  async shareComplaint(id: string, platform?: string): Promise<{ shareUrl: string; totalShares: number }> {
+    return apiService.post(`/complaints/${id}/share`, { platform });
   }
 
   async getComments(complaintId: string): Promise<ComplaintComment[]> {
