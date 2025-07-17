@@ -1,5 +1,5 @@
 // Real implementation of complaints service that calls actual API
-import { IComplaintsService, Complaint, ComplaintFormData, ComplaintFilters, ComplaintComment } from '../interfaces/IComplaintsService';
+import { IComplaintsService, Complaint, ComplaintFormData, ComplaintFilters, ComplaintComment, ComplaintStatus } from '../interfaces/IComplaintsService';
 import { apiService } from '../api';
 
 export class RealComplaintsService implements IComplaintsService {
@@ -83,5 +83,24 @@ export class RealComplaintsService implements IComplaintsService {
 
   async detectEntities(text: string): Promise<Array<{ type: string; value: string; icon: string }>> {
     return apiService.post('/complaints/detect-entities', { text });
+  }
+
+  async updateComplaintStatus(id: string, status: ComplaintStatus, updatedBy?: string): Promise<Complaint> {
+    return apiService.put(`/complaints/${id}/status`, { status, updatedBy });
+  }
+
+  async getComplaintsByStatus(status: ComplaintStatus): Promise<Complaint[]> {
+    return apiService.get(`/complaints?status=${status}`);
+  }
+
+  async getComplaintStats(): Promise<{
+    total: number;
+    pending: number;
+    inProgress: number;
+    resolved: number;
+    rejected: number;
+    resolutionRate: number;
+  }> {
+    return apiService.get('/complaints/stats');
   }
 }

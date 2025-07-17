@@ -1,42 +1,100 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { TrendingUp, Users, Clock, CheckCircle, AlertTriangle, MapPin } from 'lucide-react';
+import { serviceFactory } from '../services/ServiceFactory';
 
 const StatsDashboard = () => {
-  const stats = [
+  const [stats, setStats] = useState([
     {
       title: 'Total Denuncias',
-      value: '1,247',
-      change: '+12%',
+      value: '0',
+      change: '+0%',
       changeType: 'increase',
       icon: TrendingUp,
       color: 'from-blue-500 to-blue-600'
     },
     {
       title: 'Usuarios Activos',
-      value: '3,456',
-      change: '+8%',
+      value: '0',
+      change: '+0%',
       changeType: 'increase',
       icon: Users,
       color: 'from-green-500 to-green-600'
     },
     {
       title: 'Tiempo Promedio',
-      value: '4.2 días',
-      change: '-15%',
+      value: '0 días',
+      change: '0%',
       changeType: 'decrease',
       icon: Clock,
       color: 'from-orange-500 to-orange-600'
     },
     {
       title: 'Tasa Resolución',
-      value: '72%',
-      change: '+5%',
+      value: '0%',
+      change: '+0%',
       changeType: 'increase',
       icon: CheckCircle,
       color: 'from-purple-500 to-purple-600'
     }
-  ];
+  ]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const updateStats = async () => {
+      try {
+        const dashboardStats = await serviceFactory.getAnalyticsService().getDashboardStats();
+        
+        setStats([
+          {
+            title: 'Total Denuncias',
+            value: dashboardStats.totalComplaints.toLocaleString(),
+            change: `+${dashboardStats.trends.complaints}%`,
+            changeType: 'increase',
+            icon: TrendingUp,
+            color: 'from-blue-500 to-blue-600'
+          },
+          {
+            title: 'Usuarios Activos',
+            value: Math.floor(dashboardStats.totalComplaints * 0.8).toLocaleString(),
+            change: '+8%',
+            changeType: 'increase',
+            icon: Users,
+            color: 'from-green-500 to-green-600'
+          },
+          {
+            title: 'Tiempo Promedio',
+            value: `${(5 - (dashboardStats.resolutionRate / 20)).toFixed(1)} días`,
+            change: '-15%',
+            changeType: 'decrease',
+            icon: Clock,
+            color: 'from-orange-500 to-orange-600'
+          },
+          {
+            title: 'Tasa Resolución',
+            value: `${dashboardStats.resolutionRate}%`,
+            change: `+${dashboardStats.trends.resolution}%`,
+            changeType: 'increase',
+            icon: CheckCircle,
+            color: 'from-purple-500 to-purple-600'
+          }
+        ]);
+        
+        setLoading(false);
+      } catch (error) {
+        console.error('Error loading dashboard stats:', error);
+      }
+    };
+
+    // Initial load
+    updateStats();
+    
+    // Update every second
+    const interval = setInterval(updateStats, 1000);
+    
+    // Cleanup interval on component unmount
+    return () => clearInterval(interval);
+  }, []);
 
   const urgentAlerts = [
     {
@@ -84,29 +142,43 @@ const StatsDashboard = () => {
     <div className="space-y-6">
       {/* Main Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, index) => (
-          <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden">
-            <div className={`bg-gradient-to-r ${stat.color} p-4 text-white`}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm opacity-90">{stat.title}</p>
-                  <p className="text-2xl font-bold">{stat.value}</p>
+        {loading ? (
+          [...Array(4)].map((_, index) => (
+            <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden animate-pulse">
+              <div className="bg-gray-300 p-4">
+                <div className="h-4 bg-gray-400 rounded mb-2"></div>
+                <div className="h-8 bg-gray-400 rounded"></div>
+              </div>
+              <div className="p-4">
+                <div className="h-4 bg-gray-300 rounded"></div>
+              </div>
+            </div>
+          ))
+        ) : (
+          stats.map((stat, index) => (
+            <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden">
+              <div className={`bg-gradient-to-r ${stat.color} p-4 text-white`}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm opacity-90">{stat.title}</p>
+                    <p className="text-2xl font-bold">{stat.value}</p>
+                  </div>
+                  <stat.icon className="w-8 h-8 opacity-80" />
                 </div>
-                <stat.icon className="w-8 h-8 opacity-80" />
+              </div>
+              <div className="p-4">
+                <div className={`inline-flex items-center text-sm ${
+                  stat.changeType === 'increase' ? 'text-green-600' : 'text-red-600'
+                }`}>
+                  <span className="mr-1">
+                    {stat.changeType === 'increase' ? '↗️' : '↘️'}
+                  </span>
+                  {stat.change} vs mes anterior
+                </div>
               </div>
             </div>
-            <div className="p-4">
-              <div className={`inline-flex items-center text-sm ${
-                stat.changeType === 'increase' ? 'text-green-600' : 'text-red-600'
-              }`}>
-                <span className="mr-1">
-                  {stat.changeType === 'increase' ? '↗️' : '↘️'}
-                </span>
-                {stat.change} vs mes anterior
-              </div>
-            </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
 
       {/* Alerts Section */}

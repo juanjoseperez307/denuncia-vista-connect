@@ -5,26 +5,31 @@ import { databaseService } from '../database/DatabaseService';
 export class MockAnalyticsService implements IAnalyticsService {
   
   async getDashboardStats(): Promise<DashboardStats> {
-    const totalResults = await databaseService.query('SELECT COUNT(*) as total FROM complaints');
-    const total = totalResults[0].total;
+    // Simulate changing values over time for real-time updates
+    const baseTime = Date.now();
+    const timeVariation = Math.floor(baseTime / 5000) % 100; // Changes every 5 seconds
+    const secondVariation = Math.floor(baseTime / 1000) % 10; // Changes every second
     
-    const resolved = Math.floor(total * 0.7); // Mock 70% resolution rate
-    const inProcess = total - resolved;
+    const totalResults = await databaseService.query('SELECT COUNT(*) as total FROM complaints');
+    const total = totalResults[0].total + timeVariation + secondVariation;
+    
+    const resolved = Math.floor(total * 0.7) + (secondVariation % 2); 
+    const inProcess = total - resolved + (secondVariation % 3);
     
     const todayResults = await databaseService.query(
       "SELECT COUNT(*) as today FROM complaints WHERE time LIKE '%hora%'"
     );
-    const todayComplaints = todayResults[0].today;
+    const todayComplaints = todayResults[0].today + (secondVariation % 5);
     
     return {
       totalComplaints: total,
       inProcess,
       resolved,
-      resolutionRate: Math.floor((resolved / total) * 100),
+      resolutionRate: Math.floor((resolved / total) * 100) + (timeVariation % 8),
       todayComplaints,
       trends: {
-        complaints: 12,
-        resolution: -5
+        complaints: 12 + (timeVariation % 5),
+        resolution: -5 + (timeVariation % 3)
       }
     };
   }

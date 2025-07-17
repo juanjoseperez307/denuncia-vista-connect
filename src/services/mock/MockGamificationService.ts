@@ -1,5 +1,5 @@
 // Mock implementation of gamification service using SQL.js database
-import { IGamificationService, UserProfile, Badge, Achievement, LeaderboardEntry } from '../interfaces/IGamificationService';
+import { IGamificationService, UserProfile, Badge, Achievement, LeaderboardEntry, Challenge, LeaderboardUser } from '../interfaces/IGamificationService';
 import { databaseService } from '../database/DatabaseService';
 
 export class MockGamificationService implements IGamificationService {
@@ -204,5 +204,71 @@ export class MockGamificationService implements IGamificationService {
     
     // Check for level up after incrementing stats
     await this.checkLevelUp('1');
+  }
+
+  async getChallenges(): Promise<Challenge[]> {
+    // Simulate real-time challenge progress based on user actions
+    const baseTime = Date.now();
+    const timeVariation = Math.floor(baseTime / 12000) % 8; // Changes every 12 seconds
+    
+    return [
+      {
+        id: '1',
+        title: 'Eco-Warrior',
+        description: 'Realiza 5 denuncias sobre temas ambientales',
+        icon: '🌱',
+        progress: Math.min(5, 2 + Math.floor(timeVariation / 2)),
+        target: 5,
+        reward: 500,
+        category: 'environmental',
+        type: 'create',
+        isActive: true,
+        endsAt: '2024-12-31'
+      },
+      {
+        id: '2',
+        title: 'Colaborador',
+        description: 'Comenta en 10 denuncias de otros usuarios',
+        icon: '🤝',
+        progress: Math.min(10, 7 + Math.floor(timeVariation / 1.5)),
+        target: 10,
+        reward: 300,
+        category: 'social',
+        type: 'comment',
+        isActive: true,
+        endsAt: '2024-12-31'
+      },
+      {
+        id: '3',
+        title: 'Resolutor Rápido',
+        description: 'Ayuda a resolver 3 casos en menos de 24 horas',
+        icon: '⚡',
+        progress: Math.min(3, Math.floor(timeVariation / 3)),
+        target: 3,
+        reward: 750,
+        category: 'efficiency',
+        type: 'resolve',
+        isActive: true,
+        endsAt: '2024-12-31'
+      },
+      {
+        id: '4',
+        title: 'Verificador Experto',
+        description: 'Vota en 15 denuncias para verificar su validez',
+        icon: '✅',
+        progress: Math.min(15, 3 + timeVariation),
+        target: 15,
+        reward: 400,
+        category: 'verification',
+        type: 'vote',
+        isActive: true,
+        endsAt: '2024-12-31'
+      }
+    ];
+  }
+
+  async updateUserProgress(action: string, data: any): Promise<void> {
+    // Mock implementation to update user progress based on actions
+    console.log('User progress updated:', action, data);
   }
 }

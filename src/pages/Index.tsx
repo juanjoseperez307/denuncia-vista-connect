@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import MainLayout from '../components/MainLayout';
 import ComplaintForm from '../components/ComplaintForm';
 import ComplaintFeed from '../components/ComplaintFeed';
@@ -13,33 +13,46 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState('feed');
   
   // Fetch dashboard stats and trending topics
-  const { 
-    data: dashboardStats, 
-    loading: statsLoading, 
-    error: statsError 
-  } = useApi(
-    () => Promise.resolve(serviceFactory.getAnalyticsService().getDashboardStats()),
-    []
-  );
+  const [dashboardStats, setDashboardStats] = useState<any>(null);
+  const [trendingTopics, setTrendingTopics] = useState<any[]>([]);
+  const [userStats, setUserStats] = useState<any>(null);
+  const [statsLoading, setStatsLoading] = useState(true);
+  const [trendsLoading, setTrendsLoading] = useState(true);
+  const [userLoading, setUserLoading] = useState(true);
 
-  const { 
-    data: trendingTopics, 
-    loading: trendsLoading 
-  } = useApi(
-    () => Promise.resolve(serviceFactory.getAnalyticsService().getTrendingTopics()),
-    []
-  );
+  useEffect(() => {
+    const updateData = async () => {
+      try {
+        const [stats, topics, user] = await Promise.all([
+          serviceFactory.getAnalyticsService().getDashboardStats(),
+          serviceFactory.getAnalyticsService().getTrendingTopics(),
+          serviceFactory.getGamificationService().getUserProfile()
+        ]);
 
-  const { 
-    data: userStats, 
-    loading: userLoading 
-  } = useApi(
-    () => Promise.resolve({
-      ...serviceFactory.getGamificationService().getUserProfile(),
-      nextLevelPoints: 500
-    }),
-    []
-  );
+        setDashboardStats(stats);
+        setTrendingTopics(topics);
+        setUserStats({
+          ...user,
+          nextLevelPoints: 500
+        });
+        
+        setStatsLoading(false);
+        setTrendsLoading(false);
+        setUserLoading(false);
+      } catch (error) {
+        console.error('Error loading data:', error);
+      }
+    };
+
+    // Initial load
+    updateData();
+    
+    // Update every second for real-time updates
+    const interval = setInterval(updateData, 1000);
+    
+    // Cleanup interval on component unmount
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <MainLayout showHero={true} activeTab={activeTab} setActiveTab={setActiveTab}>
@@ -69,8 +82,6 @@ const Index = () => {
                   <div className="h-4 bg-muted rounded animate-pulse"></div>
                   <div className="h-4 bg-muted rounded animate-pulse"></div>
                 </div>
-              ) : statsError ? (
-                <div className="text-destructive text-sm">Error al cargar estadísticas</div>
               ) : (
                 <div className="space-y-3">
                   <div className="flex justify-between">
