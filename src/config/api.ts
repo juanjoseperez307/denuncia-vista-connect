@@ -1,5 +1,6 @@
 
 // API Configuration
+// Note: When VITE_USE_OPENAPI=true, most of these endpoints are auto-generated from openapi.yaml
 export const API_CONFIG = {
   // Base URLs for different environments
   baseUrl: {
@@ -74,6 +75,11 @@ export const API_CONFIG = {
 
 // Get the appropriate base URL based on environment
 export const getBaseUrl = (): string => {
+  // If VITE_API_URL is set, use it directly (for OpenAPI services)
+  if (process.env.VITE_API_URL) {
+    return process.env.VITE_API_URL;
+  }
+  
   const env = process.env.NODE_ENV as keyof typeof API_CONFIG.baseUrl;
   return API_CONFIG.baseUrl[env] || API_CONFIG.baseUrl.development;
 };
