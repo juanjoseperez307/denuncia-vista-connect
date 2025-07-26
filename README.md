@@ -1,59 +1,73 @@
-# Denuncia Vista
+# Welcome to your Lovable project
 
-Plataforma colaborativa para reportar y dar seguimiento a problemas sociales, ambientales y de servicios públicos.
+## Project info
 
-## Características
+**URL**: https://lovable.dev/projects/c3e93bd0-12fc-4241-80c2-65165d2624d6
 
-- 🗳️ **Sistema de denuncias** - Reporta problemas con categorías, ubicaciones y archivos adjuntos
-- 👤 **Sistema de usuarios** - Registro, login y perfiles con gamificación
-- 📊 **Analytics** - Dashboard con métricas y estadísticas detalladas
-- 🏆 **Gamificación** - Logros, desafíos y rankings para incentivar participación
-- 🔔 **Notificaciones** - Sistema de notificaciones en tiempo real
-- 🔍 **Búsqueda avanzada** - Búsqueda por texto, categoría y ubicación
+## How can I edit this code?
 
-## Stack Tecnológico
+There are several ways of editing your application.
 
-### Frontend
-- **React 18** con TypeScript
-- **Vite** para bundling y desarrollo
-- **Tailwind CSS** para estilos
-- **shadcn/ui** para componentes
-- **React Router** para navegación
+**Use Lovable**
 
-### Backend
-- **PHP 7.4+** con Slim Framework 4
-- **MySQL** como base de datos
-- **OpenAPI 3.0** para especificación de API
-- **JWT** para autenticación
+Simply visit the [Lovable Project](https://lovable.dev/projects/c3e93bd0-12fc-4241-80c2-65165d2624d6) and start prompting.
 
-## Instalación
+Changes made via Lovable will be committed automatically to this repo.
 
-### Frontend
-```bash
-npm install
+**Use your preferred IDE**
+
+If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+
+The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+
+Follow these steps:
+
+```sh
+# Step 1: Clone the repository using the project's Git URL.
+git clone <YOUR_GIT_URL>
+
+# Step 2: Navigate to the project directory.
+cd <YOUR_PROJECT_NAME>
+
+# Step 3: Install the necessary dependencies.
+npm i
+
+# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
 
-### Backend
-```bash
-cd php
-composer install
-php setup.php
-composer start
-```
+**Edit a file directly in GitHub**
 
-## Arquitectura API-First
+- Navigate to the desired file(s).
+- Click the "Edit" button (pencil icon) at the top right of the file view.
+- Make your changes and commit the changes.
 
-El backend utiliza un patrón API-first donde todas las rutas se generan automáticamente desde la especificación OpenAPI (`api/openapi.yaml`). El sistema lee la especificación y:
+**Use GitHub Codespaces**
 
-- Crea rutas automáticamente
-- Mapea endpoints a servicios
-- Valida requests/responses
-- Maneja autenticación JWT
+- Navigate to the main page of your repository.
+- Click on the "Code" button (green button) near the top right.
+- Select the "Codespaces" tab.
+- Click on "New codespace" to launch a new Codespace environment.
+- Edit files directly within the Codespace and commit and push your changes once you're done.
 
-### Servicios Implementados
-- `AuthService` - Autenticación y usuarios
-- `ComplaintsService` - Gestión de denuncias  
-- `AnalyticsService` - Métricas y estadísticas
-- `GamificationService` - Logros y desafíos
-- `NotificationService` - Notificaciones
+## What technologies are used for this project?
+
+This project is built with:
+
+- Vite
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
+
+## How can I deploy this project?
+
+Simply open [Lovable](https://lovable.dev/projects/c3e93bd0-12fc-4241-80c2-65165d2624d6) and click on Share -> Publish.
+
+## Can I connect a custom domain to my Lovable project?
+
+Yes, you can!
+
+To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+
+Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)

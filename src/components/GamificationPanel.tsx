@@ -32,7 +32,14 @@ const GamificationPanel = () => {
       }
     };
 
+    // Initial load
     loadData();
+    
+    // Update every second for real-time updates
+    const interval = setInterval(loadData, 1000);
+    
+    // Cleanup interval on component unmount
+    return () => clearInterval(interval);
   }, [activeRanking]);
 
   const getRarityColor = (rarity: string) => {

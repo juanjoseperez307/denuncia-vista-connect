@@ -1,4 +1,3 @@
-
 // Base API configuration
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
   ? 'https://your-api-domain.com/api' 
@@ -37,31 +36,29 @@ class ApiService {
   }
 
   // GET request
-  async get(endpoint: string, options: RequestInit = {}) {
-    return this.request(endpoint, { method: 'GET', ...options });
+  async get(endpoint: string) {
+    return this.request(endpoint, { method: 'GET' });
   }
 
   // POST request
-  async post(endpoint: string, data: any, options: RequestInit = {}) {
+  async post(endpoint: string, data: any) {
     return this.request(endpoint, {
       method: 'POST',
       body: JSON.stringify(data),
-      ...options,
     });
   }
 
   // PUT request
-  async put(endpoint: string, data: any, options: RequestInit = {}) {
+  async put(endpoint: string, data: any) {
     return this.request(endpoint, {
       method: 'PUT',
       body: JSON.stringify(data),
-      ...options,
     });
   }
 
   // DELETE request
-  async delete(endpoint: string, options: RequestInit = {}) {
-    return this.request(endpoint, { method: 'DELETE', ...options });
+  async delete(endpoint: string) {
+    return this.request(endpoint, { method: 'DELETE' });
   }
 
   // File upload

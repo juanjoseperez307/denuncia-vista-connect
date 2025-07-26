@@ -19,7 +19,7 @@ const ComplaintFeed = () => {
   });
   const [likedComplaints, setLikedComplaints] = useState<Set<string>>(new Set());
 
-  const { data: complaints, loading, refetch } = useApi<any>(
+  const { data: complaints, loading } = useApi<any>(
     () => {
       const filters: any = {};
       
@@ -102,9 +102,6 @@ const ComplaintFeed = () => {
         });
         toast.info('Me gusta removido');
       }
-      
-      // Refresh the complaints to reflect updated like count
-      await refetch();
     } catch (error) {
       toast.error('Error al procesar el me gusta');
     }
@@ -116,7 +113,7 @@ const ComplaintFeed = () => {
 
   const executeShare = async (platform: string) => {
     try {
-      const shareResult = await serviceFactory.getComplaintsService().shareComplaint(shareModal.complaintId);
+      await serviceFactory.getComplaintsService().shareComplaint(shareModal.complaintId);
       
       // Here you would integrate with actual sharing APIs
       const url = `${window.location.origin}/complaint/${shareModal.complaintId}`;
@@ -142,13 +139,7 @@ const ComplaintFeed = () => {
       
       // Award points for sharing
       await serviceFactory.getGamificationService().awardPoints('1', 5, 'Compartir reclamo');
-      
-      // Refresh the complaints to reflect updated share count
-      await refetch();
-      
-      toast.success('¡Reclamo compartido exitosamente!');
     } catch (error) {
-      toast.error('Error al compartir el reclamo');
       throw error;
     }
   };
@@ -312,13 +303,10 @@ const ComplaintFeed = () => {
                   <Heart className={`w-5 h-5 ${likedComplaints.has(complaint.id) ? 'fill-current' : 'group-hover:fill-current'}`} />
                   <span className="text-sm font-medium">{complaint.likes}</span>
                 </button>
-                <Link 
-                  to={`/complaint/${complaint.id}`}
-                  className="flex items-center space-x-2 text-gray-600 hover:text-blue-500 transition-colors"
-                >
+                <button className="flex items-center space-x-2 text-gray-600 hover:text-blue-500 transition-colors">
                   <MessageCircle className="w-5 h-5" />
                   <span className="text-sm font-medium">{complaint.comments}</span>
-                </Link>
+                </button>
                 <button 
                   onClick={() => handleShare(complaint.id, complaint.content.substring(0, 50) + '...')}
                   className="flex items-center space-x-2 text-gray-600 hover:text-green-500 transition-colors"
