@@ -1,3 +1,4 @@
+
 // API Configuration
 export const API_CONFIG = {
   // Base URLs for different environments
@@ -8,6 +9,12 @@ export const API_CONFIG = {
   
   // API endpoints
   endpoints: {
+    // Authentication
+    userRegister: '/api/user.php',
+    userLogin: '/api/user.php',
+    userLogout: '/api/user.php',
+    userProfile: '/api/user.php',
+    
     // Complaints
     complaints: '/complaints',
     complaintById: (id: string) => `/complaints/${id}`,
@@ -42,12 +49,6 @@ export const API_CONFIG = {
     gamificationAwardPoints: '/gamification/award-points',
     gamificationTransparencyScore: '/gamification/transparency-score',
     gamificationLevels: '/gamification/levels',
-    
-    // User management (for future implementation)
-    userLogin: '/auth/login',
-    userRegister: '/auth/register',
-    userProfile: '/users/profile',
-    userLogout: '/auth/logout',
   },
   
   // Request timeouts
