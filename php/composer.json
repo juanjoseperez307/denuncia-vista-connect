@@ -1,0 +1,31 @@
+{
+    "name": "denuncia-vista/api",
+    "description": "API REST para la plataforma Denuncia Vista",
+    "type": "project",
+    "require": {
+        "php": ">=7.4",
+        "slim/slim": "^4.12",
+        "slim/psr7": "^1.6",
+        "league/openapi-psr7-validator": "^0.22",
+        "cebe/openapi": "^1.7",
+        "nyholm/psr7": "^1.8",
+        "nyholm/psr7-server": "^1.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "DenunciaVista\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "DenunciaVista\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "start": "php -S localhost:8080 -t public",
+        "test": "phpunit"
+    }
+}

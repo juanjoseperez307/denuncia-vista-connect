@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,6 +10,7 @@ import ComplaintDetail from "./pages/ComplaintDetail";
 import Profile from "./pages/Profile";
 import SearchResults from "./pages/SearchResults";
 import Notifications from "./pages/Notifications";
+import { GoogleCallback } from "./components/auth/GoogleCallback";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +26,7 @@ const App = () => (
           <Route path="/profile" element={<Profile />} />
           <Route path="/search" element={<SearchResults />} />
           <Route path="/notifications" element={<Notifications />} />
+          <Route path="/auth/google/callback" element={<GoogleCallback />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
